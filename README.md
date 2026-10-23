@@ -23,7 +23,7 @@ Expected information to extract:
 | Place to keep | Colosseum | Hard constraint |
 | Latest hotel return | 19:00 | Hard constraint |
 | Walking preference | Less walking | Soft preference |
-| Clarification needed | No | — |
+| Clarification needed | No | - |
 
 The model will return structured JSON. The exact schema and annotation rules will be finalized before dataset construction. This example illustrates the intended task; it is not a model prediction.
 
