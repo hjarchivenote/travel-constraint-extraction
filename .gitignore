@@ -1,0 +1,41 @@
+# Local research collected before the NLP-focused project revision
+/research/
+
+# macOS
+.DS_Store
+._*
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Downloaded models, checkpoints, and local training output
+.cache/
+models/
+checkpoints/
+outputs/
+wandb/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+
+# Local editor state
+.idea/
+.vscode/
+
+# Submission archives
+/submission*.zip
