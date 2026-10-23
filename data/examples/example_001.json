@@ -1,0 +1,67 @@
+{
+  "id": "example_001",
+  "scenario_id": "rome_day_001",
+  "input": {
+    "reference_itinerary": [
+      {
+        "activity_id": "colosseum_visit",
+        "description": "Visit the Colosseum",
+        "place": "Colosseum",
+        "start_time": "10:00",
+        "end_time": "11:30"
+      },
+      {
+        "activity_id": "pantheon_visit",
+        "description": "Visit the Pantheon",
+        "place": "Pantheon",
+        "start_time": "14:00",
+        "end_time": "15:00"
+      },
+      {
+        "activity_id": "hotel_return",
+        "description": "Return to the hotel",
+        "place": "Hotel",
+        "start_time": "20:00",
+        "end_time": null
+      }
+    ],
+    "change_request": "Remove the Pantheon visit. I cannot walk for more than 15 minutes at a time. If possible, I would like a cafe break."
+  },
+  "target": {
+    "constraints": [
+      {
+        "type": "place",
+        "target": "place_visit",
+        "operator": "exclude",
+        "value": "Pantheon",
+        "priority": "hard",
+        "needs_clarification": false
+      },
+      {
+        "type": "walking",
+        "target": "walking_duration",
+        "operator": "<=",
+        "value": 15,
+        "unit": "minutes",
+        "scope": "per_segment",
+        "priority": "hard",
+        "needs_clarification": false
+      },
+      {
+        "type": "place",
+        "target": "place_visit",
+        "operator": "include",
+        "value": "cafe",
+        "priority": "soft",
+        "needs_clarification": false
+      }
+    ]
+  },
+  "metadata": {
+    "usage": "schema_illustration_only",
+    "authoring": "AI-assisted draft",
+    "review_status": "pending_human_review",
+    "split": null,
+    "notes": "Fictional itinerary for format review. Not a model prediction and not counted as pilot, training, validation, or test data."
+  }
+}

@@ -2,7 +2,7 @@
 
 Extract structured constraints from natural-language requests to change a travel itinerary, and compare a fine-tuned small Transformer with larger-model prompting.
 
-**Status: repository setup complete; dataset construction, model training, and evaluation have not started.**
+**Status: initial annotation rules and an illustrative JSON record drafted; pilot dataset construction, model training, and evaluation have not started.**
 
 ## Project goal
 
@@ -25,7 +25,7 @@ Expected information to extract:
 | Walking preference | Less walking | Soft preference |
 | Clarification needed | No | - |
 
-The model will return structured JSON. The exact schema and annotation rules will be finalized before dataset construction. This example illustrates the intended task; it is not a model prediction.
+The model will return structured JSON. See the [draft annotation guidelines](data/annotation_guidelines.md) and [illustrative dataset record](data/examples/example_001.json). These describe the current design, not model predictions or completed pilot data. The schema and evaluation matching rules still need to be finalized before collecting the pilot dataset.
 
 ## Scope
 
@@ -85,6 +85,7 @@ If time permits, a learning-curve experiment will compare different training-set
 ## Roadmap
 
 - [x] Create the repository structure and project overview.
+- [x] Draft the initial annotation rules and an illustrative input/target JSON record.
 - [ ] Define the JSON schema, annotation rules, and evaluation matching rules.
 - [ ] Build and review the 30–50-example pilot.
 - [ ] Verify model inference and a short LoRA training run.
