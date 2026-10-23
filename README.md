@@ -2,37 +2,42 @@
 
 Extract structured constraints from natural-language requests to change a travel itinerary, and compare a fine-tuned small Transformer with larger-model prompting.
 
-**Status: initial annotation rules and an illustrative JSON record drafted; pilot dataset construction, model training, and evaluation have not started.**
+**Status: project setup complete; output-schema design is in progress. Dataset construction, model training, and evaluation have not started.**
 
 ## Project goal
 
-Given a short reference itinerary and an English change request, identify the requirements that an itinerary adjustment should follow. The core task is NLP: extracting conditions, distinguishing hard constraints from soft preferences, and flagging requests that need clarification.
+Given a short reference itinerary and an English change request, identify the requirements that an itinerary adjustment should follow. The core task is NLP: extracting conditions, distinguishing hard constraints from soft preferences, and flagging requests that need clarification. The demonstration is set in central London and will use weather forecasts as contextual information for simple itinerary adjustments.
 
 The project investigates whether task-specific fine-tuning can improve a small model's extraction performance, and how its accuracy and inference time compare with a larger model. Improvements are hypotheses to test; no performance results are available yet.
 
 ## Example task
 
-**Reference itinerary:** Visit the Colosseum, have lunch, visit the Pantheon, and return to the hotel at 20:00.
+**Reference itinerary:** Visit the National Gallery, have lunch, walk along the South Bank, and return to the hotel at 20:00. These times are illustrative reference settings.
 
-**Change request:** "Keep the Colosseum visit. I must be back at the hotel by 19:00, and I would prefer less walking."
+**Change request:** "Keep the National Gallery visit. I must be back at the hotel by 19:00, and I would prefer less walking."
 
 Expected information to extract:
 
 | Condition | Value | Requirement type |
 | --- | --- | --- |
-| Place to keep | Colosseum | Hard constraint |
+| Place to keep | National Gallery | Hard constraint |
 | Latest hotel return | 19:00 | Hard constraint |
 | Walking preference | Less walking | Soft preference |
 | Clarification needed | No | - |
 
-The model will return structured JSON. See the [draft annotation guidelines](data/annotation_guidelines.md) and [illustrative dataset record](data/examples/example_001.json). These describe the current design, not model predictions or completed pilot data. The schema and evaluation matching rules still need to be finalized before collecting the pilot dataset.
+The model will return structured JSON. The schema, annotation rules, and evaluation matching rules will be finalized before collecting the pilot dataset. The example above illustrates the intended task; it is not a model prediction.
 
 ## Scope
 
 - English, single-turn change requests with a short reference itinerary.
+- Central London, a one-day itinerary, and walking as the initial travel mode.
 - Place inclusion and exclusion, time constraints, and walking limits or preferences.
 - Hard constraints versus soft preferences, with an explicit clarification flag for ambiguous requests.
-- A simple itinerary-adjustment demonstration using the extracted conditions.
+- A simple itinerary-adjustment demonstration using extracted conditions and weather-forecast context.
+
+London place information and weather forecasts support the demonstration. Custom change requests and their verified constraint annotations form the NLP training and evaluation dataset. The precise representation of weather-dependent requests will be settled before pilot collection; weather-aware functionality has not been implemented yet.
+
+Planned demonstration sources are [OpenStreetMap](https://www.openstreetmap.org/copyright) for London place information and [Open-Meteo](https://open-meteo.com/) for weather forecasts. Published source-derived data will include the relevant attribution and license information. Reproducible experiments will use fixed weather snapshots; a live demonstration can request a fresh forecast and identify its retrieval time.
 
 Live routing, booking, and real-time place information are outside the initial scope. The demonstration will use clearly identified reference itineraries rather than imply that fictional examples are current travel advice.
 
@@ -52,7 +57,7 @@ The initial target is approximately **400 custom examples in total**, including 
 
 Each example will contain:
 
-- A short reference itinerary.
+- A short reference itinerary set in London.
 - An English change request.
 - A manually verified structured target containing the requested constraints.
 
@@ -85,7 +90,6 @@ If time permits, a learning-curve experiment will compare different training-set
 ## Roadmap
 
 - [x] Create the repository structure and project overview.
-- [x] Draft the initial annotation rules and an illustrative input/target JSON record.
 - [ ] Define the JSON schema, annotation rules, and evaluation matching rules.
 - [ ] Build and review the 30–50-example pilot.
 - [ ] Verify model inference and a short LoRA training run.
