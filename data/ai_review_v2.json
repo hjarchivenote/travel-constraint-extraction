@@ -1,0 +1,33 @@
+{
+  "records": 400,
+  "scenario_groups": 100,
+  "split_counts": {
+    "test": 80,
+    "train": 280,
+    "validation": 40
+  },
+  "unique_request_texts": 252,
+  "cross_split_identical_requests": 0,
+  "human_reviewed_records": 0,
+  "unique_model_inputs": 400,
+  "issues": [],
+  "passed": true,
+  "limits": "Consistency checks and AI review do not establish human agreement or real-user generalization.",
+  "corpus_version": 2,
+  "review": {
+    "review_id": "ai-review-2026-10-28-v2",
+    "reviewer": "Codex (AI)",
+    "status": "first_pass_complete",
+    "scope": "AI semantic review of authored wording patterns and instantiated values, plus consistency checks on all 400 records",
+    "human_review": false
+  },
+  "dataset_sha256": "19466ef251eaa6fa81db7014e5ee9e180e95c71deb2b103e2b06f4df6e231aa5",
+  "before_review": {
+    "cross_split_identical_request_groups": 37,
+    "affected_records": 233,
+    "unique_request_texts": 182
+  },
+  "model_training_or_inference_during_review": false,
+  "human_review_complete": false,
+  "old_development_outputs": "v1 only; not v2 evaluation results"
+}

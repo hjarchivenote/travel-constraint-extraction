@@ -55,7 +55,7 @@ All three approaches will use the same output schema and held-out test set. Prom
 
 The target is **400 custom examples in total**, including training, validation, and test examples. This is a collection target, not an established minimum or a guarantee of model performance.
 
-The generator currently produces **400 synthetic candidates: 100 scenarios with four authored paraphrase templates per scenario**. The provisional split is 280 training, 40 validation, and 80 test candidates. These candidates are **not human-verified** and remain in the ignored `outputs/` directory. Templates are shared across scenario groups, so these data alone cannot establish generalization to independently written real-user requests. Test candidates remain reserved for independent human review and must not be used to choose prompts or training settings.
+The generator produces **400 synthetic candidates: 100 reference scenarios with four paraphrases per scenario**, split 280/40/80. The v2 corpus has completed a first AI review and all-record consistency checks; see the [review record](data/ai_review_v2.json). It contains 400 distinct model inputs and 252 distinct request texts. Separate wording pools prevent identical request sentences from crossing splits. Both gallery names occur with hard and soft inclusion requests. These candidates are **not human-verified** and remain in ignored `outputs/corpus_reviewed_v2/`. Intent families and wording within each split repeat, so this is a controlled synthetic task, not a real-user benchmark.
 
 Each example will contain:
 
@@ -65,7 +65,7 @@ Each example will contain:
 
 The annotation-review milestone is a **30–50-example pilot**. Initial development runs use automatically constructed candidates to verify execution, not to claim final accuracy. The generator covers explicit requirements, preferences, multiple conditions, negation, unresolved values, and conditional replacements. AI assistance and subsequent human review are recorded separately.
 
-Splits are organized by scenario: a scenario and all its paraphrases stay in the same split. The current test candidates share the generator's template families with the other splits. Their final review and any rewriting will be completed without using model predictions, and they will not be used for prompt selection or training decisions. Synthetic test data will support conclusions about this controlled task; it will not establish performance on real travelers' requests.
+Splits are organized by reference scenario: a scenario and all its paraphrases stay in the same split. The splits use separately authored wording pools while sharing task intents. Test wording was revised during data review without using model predictions; no v2 model evaluation has been run. Test examples must not be used for prompt selection or training decisions. Synthetic test results will support conclusions about this controlled task, not real travelers' requests.
 
 ## Planned evaluation
 
@@ -96,6 +96,7 @@ If time permits, a learning-curve experiment will compare different training-set
 - [x] Create the repository structure and project overview.
 - [x] Implement the output contract, extraction instructions, and one-to-one matching metrics.
 - [x] Implement a reproducible generator for 400 candidates with scenario-disjoint splits.
+- [x] Complete the first AI data review, remove cross-split identical requests, and check all 400 annotations for consistency.
 - [x] Run local small-model inference and short LoRA training with saved adapter reload.
 - [x] Run the quantized 7B comparison model on a development request.
 - [x] Retrieve London forecasts and implement rain-conditional activation.
@@ -114,11 +115,11 @@ Tested environment: **Apple M2, 16 GB unified memory, macOS 26.5.2, Python 3.13.
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
-PYTHONPATH=src .venv/bin/python -m travel_constraints.build_data
-PYTHONPATH=src .venv/bin/python -m travel_constraints.train --model small
-PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --records outputs/corpus/records.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/baseline.jsonl
-PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --adapter outputs/runtime/pilot_adapter --records outputs/corpus/records.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/adapted.jsonl
-PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records outputs/corpus/records.jsonl --predictions outputs/runtime/adapted.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --output outputs/runtime/adapted_metrics.json
+PYTHONPATH=src .venv/bin/python -m travel_constraints.build_data --output outputs/corpus_reviewed_v2
+PYTHONPATH=src .venv/bin/python -m travel_constraints.train --model small --records outputs/corpus_reviewed_v2/records.jsonl --data outputs/corpus_reviewed_v2/pilot_training --adapter outputs/runtime/v2_pilot_adapter
+PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --records outputs/corpus_reviewed_v2/records.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/baseline.jsonl
+PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --adapter outputs/runtime/v2_pilot_adapter --records outputs/corpus_reviewed_v2/records.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/adapted.jsonl
+PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records outputs/corpus_reviewed_v2/records.jsonl --predictions outputs/runtime/adapted.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --output outputs/runtime/adapted_metrics.json
 PYTHONPATH=src .venv/bin/python -m travel_constraints.weather
 PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 ```

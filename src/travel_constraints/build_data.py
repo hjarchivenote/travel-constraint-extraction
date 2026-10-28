@@ -12,6 +12,7 @@ from pathlib import Path
 import random
 
 from .contract import messages_for, validate_output
+from .request_wording import held_out_texts
 
 
 def constraint(kind, target, operator, value, *, priority="hard", clarify=False, rain=None, **extra):
@@ -41,7 +42,8 @@ def scenario(family, index):
         {"id": "hotel_return", "time": hotel_time},
     ]
     if family == "place_include":
-        soft = index % 2 == 1
+        # Place identity must not determine whether a request is hard or soft.
+        soft = index % 4 in (1, 2)
         priority = "soft" if soft else "hard"
         if soft:
             texts = [f"If possible, keep the visit to {gallery}.", f"I would prefer to retain {gallery} on the itinerary.",
@@ -92,7 +94,7 @@ def scenario(family, index):
         gold = [constraint("walking", "walking_duration", "<=", value, clarify=True, unit="minutes", scope=None)]
     elif family == "near_lunch":
         texts = [f"Have lunch near {gallery}.", f"Place my lunch stop close to {gallery}.",
-                 f"Find somewhere to eat lunch in the vicinity of {gallery}.", f"Arrange lunch nearby the gallery, {gallery}."]
+                 f"Find somewhere to eat lunch in the vicinity of {gallery}.", f"Schedule lunch somewhere near {gallery}."]
         gold = [constraint("place", "lunch", "near", gallery)]
     elif family in {"weather_alternative", "combined"}:
         gold = [constraint("weather", "outdoor_walk", "keep", None, rain=False),
@@ -131,6 +133,8 @@ def build_records(seed=42):
                   for position, index in enumerate(order)}
         for index in range(10):
             itinerary, texts, target = scenario(family, index)
+            if splits[index] != "train":
+                texts = held_out_texts(family, splits[index], itinerary, target)
             errors = validate_output(target)
             if errors:
                 raise ValueError(f"Invalid constructed target: {family}/{index}: {errors}")
@@ -146,11 +150,17 @@ def build_records(seed=42):
                     "input": {"city": "London", "reference_itinerary": itinerary, "change_request": text},
                     "target": target,
                     "metadata": {"authoring": "AI-assisted controlled template generation",
+                                 "corpus_version": 2, "wording_pool": splits[index],
                                  "human_reviewed": False, "scenario_fingerprint": fingerprint,
                                  "itinerary_times": "fictional reference settings, not opening hours or bookings"},
                 })
     if len(records) != 400 or len(seen_scenarios) != 100:
         raise ValueError("Dataset must contain 400 candidates in 100 scenario groups.")
+    text_splits = {}
+    for record in records:
+        text = " ".join(record["input"]["change_request"].casefold().split())
+        if text_splits.setdefault(text, record["split"]) != record["split"]:
+            raise ValueError("A request sentence appears in more than one split.")
     return records
 
 
@@ -191,8 +201,9 @@ def main():
     (output / "records.jsonl").write_text("".join(json.dumps(record) + "\n" for record in records))
     metadata = {"records": len(records), "scenario_groups": 100, "split_records": dict(Counter(record["split"] for record in records)),
                 "seed": 42, "human_reviewed_records": 0, "status": "candidates_pending_human_review",
-                "generation_method": "semantic frames rendered with four authored paraphrase templates per family",
-                "limitation": "Controlled synthetic language; shared template families across splits. Not an independent real-user benchmark.",
+                "corpus_version": 2,
+                "generation_method": "100 reference scenarios, four paraphrases each; separate authored wording pools per split",
+                "limitation": "Synthetic language. Intents, semantic frames and within-split wording repeat; no exact request text crosses splits. Not a real-user benchmark.",
                 "test_policy": "Test candidates are reserved for human review and must not be used for training or prompt selection."}
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     export_training(records, output / "pilot_training", args.train_limit, args.valid_limit)
