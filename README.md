@@ -128,6 +128,8 @@ The default training command is an execution pilot, not final training. It masks
 
 Local GPU development runs have encountered intermittent Metal `Impacting Interactivity` failures. Training saves periodic checkpoints and preserves failed-run logs. A short CPU training check also completed; `train --device cpu --adapter outputs/runtime/cpu_run` selects that slower alternative without changing system GPU settings. Longer CPU training has not yet been verified. Resuming an adapter restores its weights, not the optimizer state, and must be recorded as a separate run.
 
+The trainer also accepts `--disable-compile`, using the documented [MLX compilation diagnostic setting](https://ml-explore.github.io/mlx/build/html/usage/compile.html). One GPU diagnostic with six-condition requests completed 10 training steps in 35.864 seconds and saved checkpoints. This short check does not establish the cause of the intermittent failure or prove stability over a full training run. Compilation settings are recorded in each run manifest.
+
 The London weather backend requests ECMWF IFS 0.25° data. Rain/showers are preceding-hour totals; a 14:00–15:00 activity uses the bucket ending at 15:00. The demonstration uses a configurable 0.1 mm/hour rain-plus-showers threshold, conservatively considers overlapping partial hours, and preserves unknown weather as pending rather than assuming dry conditions. See [Open-Meteo's hourly variable definitions](https://open-meteo.com/en/docs).
 
 ## Licensing and model attribution

@@ -24,6 +24,8 @@ def main():
     parser.add_argument("--max-seq-length", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.0001)
     parser.add_argument("--device", choices=["gpu", "cpu"], default="gpu")
+    parser.add_argument("--disable-compile", action="store_true",
+                        help="Disable MLX compilation for a Metal-error diagnostic run")
     parser.add_argument("--resume-adapter-file")
     parser.add_argument("--save-every", type=int, default=20)
     parser.add_argument("--purpose", choices=["pilot", "final"], default="pilot")
@@ -82,7 +84,12 @@ def main():
         if not Path(args.resume_adapter_file).is_file():
             raise SystemExit("Resume adapter file does not exist.")
         command.extend(["--resume-adapter-file", args.resume_adapter_file])
+    environment = os.environ | {"PYTHONUNBUFFERED": "1", "HF_HUB_DISABLE_PROGRESS_BARS": "1"}
+    if args.disable_compile:
+        environment["MLX_DISABLE_COMPILE"] = "1"
     manifest = {"purpose": args.purpose, "command": command, "iterations": args.iters, "device": args.device,
+                "compilation_disabled": "MLX_DISABLE_COMPILE" in environment,
+                "mlx_disable_compile_env": environment.get("MLX_DISABLE_COMPILE"),
                 "max_observed_example_tokens": max_observed_tokens,
                 "train_records": len(selections["train"]), "validation_records": len(selections["validation"]),
                 "test_records_used": 0, "annotation_review_complete": args.purpose == "final",
@@ -95,7 +102,6 @@ def main():
     manifest_path = adapter / "run_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2))
     started = time.perf_counter()
-    environment = os.environ | {"PYTHONUNBUFFERED": "1", "HF_HUB_DISABLE_PROGRESS_BARS": "1"}
     with (adapter / "training.log").open("w") as log:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    text=True, bufsize=1, env=environment)
