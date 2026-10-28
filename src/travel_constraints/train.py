@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--layers", type=int, default=4)
     parser.add_argument("--max-seq-length", type=int, default=1024)
     parser.add_argument("--learning-rate", type=float, default=0.0001)
+    parser.add_argument("--device", choices=["gpu", "cpu"], default="gpu")
     parser.add_argument("--resume-adapter-file")
     parser.add_argument("--save-every", type=int, default=20)
     parser.add_argument("--purpose", choices=["pilot", "final"], default="pilot")
@@ -66,7 +67,11 @@ def main():
     if adapter.exists() and any(adapter.iterdir()):
         raise SystemExit("Adapter directory is not empty; use a distinct run directory.")
     adapter.mkdir(parents=True, exist_ok=True)
-    command = [sys.executable, "-m", "mlx_lm", "lora", "--model", args.model,
+    launcher = [sys.executable, "-m", "mlx_lm"]
+    if args.device == "cpu":
+        launcher = [sys.executable, "-c", "import runpy; import mlx.core as mx; "
+                    "mx.set_default_device(mx.cpu); runpy.run_module('mlx_lm', run_name='__main__')"]
+    command = launcher + ["lora", "--model", args.model,
                "--train", "--data", str(data), "--adapter-path", str(adapter),
                "--iters", str(args.iters), "--num-layers", str(args.layers),
                "--batch-size", "1", "--learning-rate", str(args.learning_rate),
@@ -77,7 +82,7 @@ def main():
         if not Path(args.resume_adapter_file).is_file():
             raise SystemExit("Resume adapter file does not exist.")
         command.extend(["--resume-adapter-file", args.resume_adapter_file])
-    manifest = {"purpose": args.purpose, "command": command, "iterations": args.iters,
+    manifest = {"purpose": args.purpose, "command": command, "iterations": args.iters, "device": args.device,
                 "max_observed_example_tokens": max_observed_tokens,
                 "train_records": len(selections["train"]), "validation_records": len(selections["validation"]),
                 "test_records_used": 0, "annotation_review_complete": args.purpose == "final",

@@ -57,6 +57,7 @@ def main():
     model, tokenizer = load(args.model, adapter_path=args.adapter)
     load_seconds = time.perf_counter() - started
     model_config = json.loads((Path(args.model) / "config.json").read_text())
+    adapter_sha256 = hashlib.sha256((Path(args.adapter) / "adapters.safetensors").read_bytes()).hexdigest() if args.adapter else None
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w") as handle:
@@ -72,6 +73,7 @@ def main():
             result = {
                 "id": record["id"], "scenario_id": record["scenario_id"], "split": args.split,
                 "model_path": args.model, "adapter_path": args.adapter,
+                "adapter_sha256": adapter_sha256,
                 "model_revision": Path(args.model).name,
                 "quantization": model_config.get("quantization", model_config.get("quantization_config")),
                 "weight_dtype": model_config.get("dtype", model_config.get("torch_dtype")),
@@ -81,6 +83,7 @@ def main():
                 "first_generation_after_load": index == 0,
                 "max_tokens": args.max_tokens, "temperature": 0.0, "seed": 42,
                 "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
+                "record_input_sha256": hashlib.sha256(json.dumps(record["input"], sort_keys=True).encode()).hexdigest(),
                 "schema_sha256": hashlib.sha256(Path(__file__).with_name("output_schema.json").read_bytes()).hexdigest(),
                 "output_tokens_retokenized": len(tokenizer.encode(raw, add_special_tokens=False)),
                 "mlx_lm_version": importlib.metadata.version("mlx-lm"),
