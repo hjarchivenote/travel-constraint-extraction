@@ -1,0 +1,71 @@
+{
+  "city": "London",
+  "attribution": "© OpenStreetMap contributors",
+  "license": "ODbL-1.0",
+  "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "source": "https://download.geofabrik.de/europe/united-kingdom/england/greater-london-261016.osm.pbf",
+  "snapshot_date": "2026-10-16",
+  "limitations": "Static reference locations. Way coordinates are centroids, not verified entrances. No current opening hours or availability are asserted.",
+  "places": [
+    {
+      "osm_type": "node",
+      "osm_id": 2647639741,
+      "name": "The Courtauld Gallery",
+      "category": "gallery",
+      "latitude": 51.5116244,
+      "longitude": -0.1177002,
+      "location_kind": "osm_node",
+      "osm_url": "https://www.openstreetmap.org/node/2647639741"
+    },
+    {
+      "osm_type": "node",
+      "osm_id": 9242555585,
+      "name": "WatchHouse Somerset House",
+      "category": "cafe",
+      "latitude": 51.5114469,
+      "longitude": -0.1167795,
+      "location_kind": "osm_node",
+      "osm_url": "https://www.openstreetmap.org/node/9242555585"
+    },
+    {
+      "osm_type": "way",
+      "osm_id": 4372002,
+      "name": "National Gallery",
+      "category": "gallery",
+      "latitude": 51.5088165364486,
+      "longitude": -0.12890034485981308,
+      "location_kind": "object_centroid",
+      "osm_url": "https://www.openstreetmap.org/way/4372002"
+    },
+    {
+      "osm_type": "way",
+      "osm_id": 24642569,
+      "name": "Tate Modern",
+      "category": "gallery",
+      "latitude": 51.50756269714286,
+      "longitude": -0.09972599428571428,
+      "location_kind": "object_centroid",
+      "osm_url": "https://www.openstreetmap.org/way/24642569"
+    },
+    {
+      "osm_type": "way",
+      "osm_id": 61453261,
+      "name": "Sir John Soane's Museum",
+      "category": "museum",
+      "latitude": 51.517096623076924,
+      "longitude": -0.11746725384615385,
+      "location_kind": "object_centroid",
+      "osm_url": "https://www.openstreetmap.org/way/61453261"
+    },
+    {
+      "osm_type": "way",
+      "osm_id": 204068874,
+      "name": "London Eye",
+      "category": "attraction",
+      "latitude": 51.50346090000001,
+      "longitude": -0.11963964,
+      "location_kind": "object_centroid",
+      "osm_url": "https://www.openstreetmap.org/way/204068874"
+    }
+  ]
+}

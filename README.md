@@ -2,13 +2,13 @@
 
 Extract structured constraints from natural-language requests to change a travel itinerary, and compare a fine-tuned small Transformer with larger-model prompting.
 
-**Status: project setup complete; output-schema design is in progress. Dataset construction, model training, and evaluation have not started.**
+**Status: the extraction contract, dataset generator, MLX training/inference pipeline, evaluation code, and London weather backend are implemented. Local development runs have started. Human annotation review and final held-out evaluation remain pending.**
 
 ## Project goal
 
 Given a short reference itinerary and an English change request, identify the requirements that an itinerary adjustment should follow. The core task is NLP: extracting conditions, distinguishing hard constraints from soft preferences, and flagging requests that need clarification. The demonstration is set in central London and will use weather forecasts as contextual information for simple itinerary adjustments.
 
-The project investigates whether task-specific fine-tuning can improve a small model's extraction performance, and how its accuracy and inference time compare with a larger model. Improvements are hypotheses to test; no performance results are available yet.
+The project investigates whether task-specific fine-tuning can improve a small model's extraction performance, and how its accuracy and inference time compare with a larger model. Improvements are hypotheses to test; no final held-out performance results are available yet.
 
 ## Example task
 
@@ -25,7 +25,7 @@ Expected information to extract:
 | Walking preference | Less walking | Soft preference |
 | Clarification needed | No | - |
 
-The model will return structured JSON. The schema, annotation rules, and evaluation matching rules will be finalized before collecting the pilot dataset. The example above illustrates the intended task; it is not a model prediction.
+The model returns structured JSON using the [output schema](src/travel_constraints/output_schema.json). The [shared contract](src/travel_constraints/contract.py) defines the extraction instructions. The example above illustrates the task; it is not a reported prediction.
 
 ## Scope
 
@@ -35,7 +35,7 @@ The model will return structured JSON. The schema, annotation rules, and evaluat
 - Hard constraints versus soft preferences, with an explicit clarification flag for ambiguous requests.
 - A simple itinerary-adjustment demonstration using extracted conditions and weather-forecast context.
 
-London place information and weather forecasts support the demonstration. Custom change requests and their verified constraint annotations form the NLP training and evaluation dataset. The precise representation of weather-dependent requests will be settled before pilot collection; weather-aware functionality has not been implemented yet.
+London place information and weather forecasts support the demonstration. Custom change requests and their reviewed constraint annotations will form the final NLP dataset. Weather-dependent actions carry an explicit `condition`, preserving both rain/no-rain alternatives. The weather backend retrieves a forecast and selects applicable conditions; a complete itinerary interface and routing system have not been implemented.
 
 Planned demonstration sources are [OpenStreetMap](https://www.openstreetmap.org/copyright) for London place information and [Open-Meteo](https://open-meteo.com/) for weather forecasts. Published source-derived data will include the relevant attribution and license information. Reproducible experiments will use fixed weather snapshots; a live demonstration can request a fresh forecast and identify its retrieval time.
 
@@ -53,7 +53,9 @@ All three approaches will use the same output schema and held-out test set. Prom
 
 ## Planned dataset
 
-The initial target is approximately **400 custom examples in total**, including training, validation, and test examples. This is an initial collection target, not an established minimum or a guarantee of model performance.
+The target is **400 custom examples in total**, including training, validation, and test examples. This is a collection target, not an established minimum or a guarantee of model performance.
+
+The generator currently produces **400 synthetic candidates: 100 scenarios with four authored paraphrase templates per scenario**. The provisional split is 280 training, 40 validation, and 80 test candidates. These candidates are **not human-verified** and remain in the ignored `outputs/` directory. Templates are shared across scenario groups, so these data alone cannot establish generalization to independently written real-user requests. Test candidates remain reserved for independent human review and must not be used to choose prompts or training settings.
 
 Each example will contain:
 
@@ -61,9 +63,9 @@ Each example will contain:
 - An English change request.
 - A manually verified structured target containing the requested constraints.
 
-The first milestone is a **30–50-example pilot** to check annotation consistency and the training workflow. Examples will cover explicit requirements, preferences, multiple conditions, negation, and ambiguity. If AI assists with drafting examples or annotations, that assistance and the manual review process will be documented.
+The annotation-review milestone is a **30–50-example pilot**. Initial development runs use automatically constructed candidates to verify execution, not to claim final accuracy. The generator covers explicit requirements, preferences, multiple conditions, negation, unresolved values, and conditional replacements. AI assistance and subsequent human review are recorded separately.
 
-Splits will be organized by scenario: a scenario and all its paraphrases must stay in the same split. Test scenarios will be authored and reviewed independently from training examples, and will not be used for prompt selection or training decisions. Synthetic test data will support conclusions about this controlled task; it will not establish performance on real travelers' requests.
+Splits are organized by scenario: a scenario and all its paraphrases stay in the same split. The current test candidates share the generator's template families with the other splits. Their final review and any rewriting will be completed without using model predictions, and they will not be used for prompt selection or training decisions. Synthetic test data will support conclusions about this controlled task; it will not establish performance on real travelers' requests.
 
 ## Planned evaluation
 
@@ -72,6 +74,8 @@ Splits will be organized by scenario: a scenario and all its paraphrases must st
 - **JSON validity rate:** the proportion of outputs that satisfy the agreed schema.
 - **Inference time:** with hardware, model precision, and measurement conditions documented.
 - **Error analysis:** examples of missed conditions, incorrect values, requirement-type errors, and ambiguity handling.
+
+Matching is one-to-one and ignores constraint ordering. Content matches include the condition, target, operator, value, unit, and scope; requirement strength and clarification are scored separately on matches. Strict JSON/schema failures receive no extracted constraints. Expected record IDs are checked so missing predictions cannot silently disappear from a reported score. Development checks must not be presented as final test results.
 
 If time permits, a learning-curve experiment will compare different training-set sizes while keeping the validation and test sets fixed.
 
@@ -90,10 +94,13 @@ If time permits, a learning-curve experiment will compare different training-set
 ## Roadmap
 
 - [x] Create the repository structure and project overview.
-- [ ] Define the JSON schema, annotation rules, and evaluation matching rules.
+- [x] Implement the output contract, extraction instructions, and one-to-one matching metrics.
+- [x] Implement a reproducible generator for 400 candidates with scenario-disjoint splits.
+- [x] Run local small-model inference and short LoRA training with saved adapter reload.
+- [x] Run the quantized 7B comparison model on a development request.
+- [x] Retrieve London forecasts and implement rain-conditional activation.
 - [ ] Build and review the 30–50-example pilot.
-- [ ] Verify model inference and a short LoRA training run.
-- [ ] Expand the dataset and freeze scenario-based splits.
+- [ ] Complete human review and freeze the 400-example dataset and its splits.
 - [ ] Run the small-model baseline, LoRA fine-tuning, and larger-model prompting comparison.
 - [ ] Evaluate the models and analyze errors.
 - [ ] Build the simple demonstration and add screenshots.
@@ -101,7 +108,24 @@ If time permits, a learning-curve experiment will compare different training-set
 
 ## Running the project
 
-No executable pipeline or installation instructions are available yet. Dependencies and commands will be added after the first verified model run.
+Tested environment: **Apple M2, 16 GB unified memory, macOS 26.5.2, Python 3.13.7**. The model runtime uses [MLX LM](https://github.com/ml-explore/mlx-lm), with [LoRA training](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md) on the Apple GPU. The 7B comparison uses a pinned 4-bit MLX conversion; this precision difference must be reported when discussing speed or accuracy.
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
+PYTHONPATH=src .venv/bin/python -m travel_constraints.build_data
+PYTHONPATH=src .venv/bin/python -m travel_constraints.train --model small
+PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --records outputs/corpus/records.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/baseline.jsonl
+PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --adapter outputs/runtime/pilot_adapter --records outputs/corpus/records.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/adapted.jsonl
+PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records outputs/corpus/records.jsonl --predictions outputs/runtime/adapted.jsonl --ids outputs/corpus/pilot_training/validation_ids.json --output outputs/runtime/adapted_metrics.json
+PYTHONPATH=src .venv/bin/python -m travel_constraints.weather
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+The default training command is an execution pilot, not final training. It masks prompt tokens and updates LoRA adapters in the last four layers. The corpus builder refuses accidental overwrites, and the trainer checks splits, exported annotations, and token lengths. Final-mode training/evaluation requires reviewed labels. Models, adapters, generated candidates, and development outputs remain local. Only completed implementation units and reviewed artifacts are published.
+
+The London weather backend requests ECMWF IFS 0.25° data. Rain/showers are preceding-hour totals; a 14:00–15:00 activity uses the bucket ending at 15:00. The demonstration uses a configurable 0.1 mm/hour rain-plus-showers threshold, conservatively considers overlapping partial hours, and preserves unknown weather as pending rather than assuming dry conditions. See [Open-Meteo's hourly variable definitions](https://open-meteo.com/en/docs).
 
 ## Licensing and model attribution
 

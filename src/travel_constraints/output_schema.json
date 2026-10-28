@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Travel constraint extraction output v1",
+  "type": "object",
+  "required": ["constraints"],
+  "additionalProperties": false,
+  "properties": {
+    "constraints": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/constraint"}
+    }
+  },
+  "$defs": {
+    "condition": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["weather", "occurs"],
+          "additionalProperties": false,
+          "properties": {
+            "weather": {"const": "rain"},
+            "occurs": {"type": "boolean"}
+          }
+        }
+      ]
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["type", "target", "operator", "value", "priority", "needs_clarification", "condition"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["place", "time", "walking", "weather"]},
+        "target": {"type": "string", "minLength": 1},
+        "operator": {"enum": ["include", "exclude", "near", "<=", "=", ">=", "minimize", "keep", "replace_with", "avoid"]},
+        "value": {"type": ["string", "number", "null"]},
+        "priority": {"enum": ["hard", "soft", null]},
+        "needs_clarification": {"type": "boolean"},
+        "condition": {"$ref": "#/$defs/condition"},
+        "unit": {"const": "minutes"},
+        "scope": {"enum": ["per_segment", "daily_total", null]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "place"}, "operator": {"enum": ["include", "exclude"]}}},
+          "then": {"properties": {"target": {"const": "place_visit"}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "place"}, "operator": {"const": "near"}}},
+          "then": {"properties": {"target": {"const": "lunch"}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "place"}}},
+          "then": {"properties": {"operator": {"enum": ["include", "exclude", "near"]}, "value": {"type": ["string", "null"]}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "time"}}},
+          "then": {"properties": {"target": {"const": "hotel_return"}, "operator": {"enum": ["<=", "=", ">="]}, "value": {"anyOf": [{"type": "null"}, {"type": "string", "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"}]}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "walking"}}},
+          "then": {"properties": {"target": {"enum": ["walking_duration", "walking_amount"]}, "operator": {"enum": ["<=", ">=", "minimize"]}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "weather"}}},
+          "then": {"properties": {"operator": {"enum": ["keep", "replace_with", "avoid"]}, "condition": {"type": "object", "$ref": "#/$defs/condition"}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "weather"}, "operator": {"const": "replace_with"}}},
+          "then": {"properties": {"value": {"type": "string", "minLength": 1}}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "weather"}, "operator": {"enum": ["keep", "avoid"]}}},
+          "then": {"properties": {"value": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"target": {"const": "walking_duration"}}},
+          "then": {"required": ["unit", "scope"], "properties": {"type": {"const": "walking"}, "value": {"type": ["number", "null"], "minimum": 0}, "operator": {"enum": ["<=", ">="]}}}
+        },
+        {
+          "if": {"properties": {"operator": {"const": "minimize"}}},
+          "then": {"properties": {"type": {"const": "walking"}, "target": {"const": "walking_amount"}, "value": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"target": {"const": "walking_amount"}}},
+          "then": {"properties": {"type": {"const": "walking"}, "operator": {"const": "minimize"}, "value": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"type": {"enum": ["place", "time"]}, "value": {"type": "null"}}},
+          "then": {"properties": {"needs_clarification": {"const": true}}}
+        },
+        {
+          "if": {"properties": {"target": {"const": "walking_duration"}}, "anyOf": [{"properties": {"scope": {"type": "null"}}}, {"properties": {"value": {"type": "null"}}}]},
+          "then": {"properties": {"needs_clarification": {"const": true}}}
+        },
+        {
+          "if": {"properties": {"priority": {"type": "null"}}},
+          "then": {"properties": {"needs_clarification": {"const": true}}}
+        }
+      ]
+    }
+  }
+}
