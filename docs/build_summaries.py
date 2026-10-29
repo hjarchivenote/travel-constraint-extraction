@@ -1,0 +1,216 @@
+"""Write the public overview and Korean explanation from completed measurements."""
+import json
+from pathlib import Path
+
+ROOT=Path(__file__).resolve().parents[1]
+
+
+def main():
+    result=json.loads((ROOT/'experiments/results/comparison.json').read_text())
+    metrics=result['metrics']
+    lo=metrics['small_lora']
+    rows=[]
+    names={'small_baseline':'0.5B baseline, zero-shot','small_lora':'0.5B + LoRA, zero-shot','large_fewshot':'7B 4-bit, two-shot'}
+    for key in ('small_baseline','small_lora','large_fewshot'):
+        m=metrics[key]
+        rows.append(f'| {names[key]} | {m["f1"]:.3f} | {round(m["exact_record_accuracy"]*80)}/80 | {m["schema_validity_rate"]:.1%} | {m["mean_inference_seconds_including_first_request"]:.2f} |')
+    result_table='| Approach | Content F1 | Fully correct records | Valid JSON | Mean generation seconds |\n| --- | ---: | ---: | ---: | ---: |\n'+'\n'.join(rows)
+    readme=f'''# Travel Constraint Extraction
+
+**Fine-tune a small Transformer to extract structured conditions from English requests to change a London itinerary.**
+
+The completed project includes a 400-record synthetic corpus, a trained LoRA adapter, a frozen three-model comparison, raw predictions and error analysis, and a local demonstration with weather-dependent plan edits.
+
+![London, Replanned interface](docs/images/demo.png)
+
+## Task
+
+Input: a short reference itinerary and a change request such as “Keep the gallery, return by 19:00, and reduce walking.” Output: JSON constraints recording the requested place, time operator and value, hard/soft priority, clarification needs, and any rain/dry condition. Relative phrases resolve against the reference itinerary. Missing information stays unresolved instead of receiving an invented value.
+
+The **NLP model performs extraction**. A strict JSON/schema validator checks the output. A small deterministic planner then demonstrates how those conditions affect an itinerary. Weather and map data support that demonstration; route optimization is outside scope.
+
+## Held-out results
+
+{result_table}
+
+Same **80 inputs from 20 reference groups**, temperature 0, seed 42, 768-token generation limit, strict schema, and no response repair. Content F1 matches constraint content; exact records additionally require all priorities and clarification flags. Invalid outputs count as empty extraction, so schema compliance can strongly affect F1. Priority accuracy must be read with recall because it is computed only on matched constraints.
+
+**These are AI-reviewed synthetic labels, with zero human-verified records.** The corpus contains 100 scenarios × four paraphrases, split 280/40/80 by scenario. There are 400 unique full inputs and 252 distinct request texts; no identical request text crosses splits, but intents and wording patterns repeat. This is a controlled extraction experiment, not a real-user benchmark.
+
+The 7B model differs in capacity, 4-bit quantization, and two-shot prompting. Generation timing includes prompt processing and the first request after load; model loading is separate. These measurements do not isolate model size or establish general inference-speed rankings. See the [frozen protocol](experiments/protocol.json), [full metrics and bootstrap intervals](experiments/results/comparison.json), and [actual errors](experiments/results/error_analysis.json).
+
+## Run the demonstration
+
+Saved validation predictions work with standard Python and no downloaded language model:
+
+```bash
+python3 demo/app.py
+```
+
+Open <http://127.0.0.1:8765>. Saved examples are actual model outputs, clearly labeled and separate from the held-out test. Changing the text selects live mode. Rain/dry controls are labeled simulations; forecast mode uses a timestamped Open-Meteo / ECMWF snapshot and supports refreshing it.
+
+For **live model inference on Apple Silicon**:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
+.venv/bin/python demo/app.py
+```
+
+The published adapter is loaded from `artifacts/qwen05_lora/`. No paid LLM API is required. See the [demo guide](demo/README.md). The first request loads the base model; model predictions can be wrong, and schema errors are displayed without correction.
+
+## Training and reproducibility
+
+Tested on **Apple M2, 16 GB unified memory, macOS 26.5.2, Python 3.13.7**, with pinned MLX dependencies in `requirements.txt`.
+
+- Small model: `Qwen/Qwen2.5-0.5B-Instruct`, revision `7ae557604adf67be50417f59c2c2f167def9a775`, bfloat16.
+- Large comparison: `mlx-community/Qwen2.5-7B-Instruct-4bit`, revision `c26a38f6a37d0a51b4e9a1eb3026530fa35d9fed`.
+- LoRA: last four layers, rank 8, scale 20, 733,184 trainable parameters; Adam, learning rate 0.0001, batch 1, seed 42, 840 steps (three epochs), prompt loss masked, sequence cap 1,024.
+- Final training completed on CPU after a failed GPU attempt. Failed weights were not reused. The trainer reported 6,008.016 seconds; all 56 saved adapter tensors were reloaded and matched exactly. Validation pool: 40 records, two batches sampled per loss check.
+- Dataset and schema hashes, split IDs, training settings, model revisions, and inference provenance are retained. There was one completed training seed; no test-driven prompt or label changes.
+
+Evaluate new runs separately without overwriting the submitted results:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models all
+PYTHONPATH=src .venv/bin/python experiments/run_comparison.py --output outputs/reproduction/results --runtime outputs/reproduction/runtime
+```
+
+This uses the published adapter when the original local training directory is absent. The frozen protocol preserves the original path as provenance. The runner refuses partial files rather than silently replacing them. Exact numerical reproduction can vary with runtime and hardware.
+
+Recompute a submitted model's aggregate scores without inference:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records data/travel_requests.jsonl --predictions experiments/results/small_lora.jsonl --split test --output outputs/recomputed_lora_metrics.json
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+The data builder and training launcher are retained for inspection. Their historical `final` training gate requires human-reviewed annotations; this experiment keeps all human-review flags false and records its full synthetic training run separately. Releasing the adapter does not imply that this gate was bypassed or that labels were human approved.
+
+## London sources and boundaries
+
+Six reference locations come from **© OpenStreetMap contributors**, ODbL, with source/snapshot metadata. A nearby cafe candidate uses straight-line distance, not a walking route. Opening hours and availability are unverified; book cafe is a requested category until a venue is selected.
+
+Forecasts are **Open-Meteo / ECMWF, CC BY 4.0**, using ECMWF IFS 0.25°. Rain/showers are preceding-hour totals: 14:00–15:00 uses the bucket ending at 15:00. The 0.1 mm/hour threshold is an application choice. Missing coverage stays unknown. The demo does not guarantee a feasible itinerary, walking cap, or booking.
+
+## Project files
+
+| Path | Contents |
+| --- | --- |
+| `data/` | Frozen 400-record corpus, splits, review provenance, London source snapshots |
+| `src/travel_constraints/` | Contract, generation/audit, training, inference, metrics, weather, planner |
+| `artifacts/qwen05_lora/` | Trained adapter, model card, Apache license and modification notice |
+| `experiments/` | Frozen protocol, training provenance, raw predictions, scores, errors |
+| `demo/` | Local interface, actual validation predictions, run guide |
+| `docs/` | Seven-page report, six-slide deck, speaking notes, Korean explanation, screenshots |
+| `tests/` | Dataset/metric/schema/weather/planner behavior checks |
+
+## Submission and authorship
+
+[Report](docs/travel_constraint_report.pdf) · [Slides (PPTX)](docs/travel_constraint_presentation.pptx) · [Slides (PDF)](docs/travel_constraint_presentation.pdf) · [Korean explanation](docs/understanding_ko.md)
+
+Hyojin Lee · Recent Areas of AI · 2026. Codex assisted with implementation, synthetic labels, consistency checks, experiment execution, and documentation. Human annotation review is not claimed. The report describes this assistance and the experiment's limits.
+
+## Licenses and sources
+
+The Qwen base models use Apache 2.0; the redistributed adapter preserves its [license and modification notice](artifacts/qwen05_lora/NOTICE). Original project materials have no additional blanket reuse license; see [LICENSE_SCOPE.md](LICENSE_SCOPE.md). Third-party data retains its own terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Technical sources: [Qwen2.5 report](https://arxiv.org/abs/2412.15115), [LoRA paper](https://arxiv.org/abs/2106.09685), [Open-Meteo ECMWF documentation](https://open-meteo.com/en/docs/ecmwf-api), [OpenStreetMap copyright](https://www.openstreetmap.org/copyright).
+'''
+    (ROOT/'README.md').write_text(readme)
+    result_ko=[]
+    for key,name in [('small_baseline','학습 전 작은 모델'),('small_lora','LoRA 학습한 작은 모델'),('large_fewshot','큰 모델 + 예시 2개')]:
+        m=metrics[key];result_ko.append(f'| {name} | {m["f1"]:.3f} | {round(m["exact_record_accuracy"]*80)}/80 | {m["schema_validity_rate"]:.1%} |')
+    ko='''# 프로젝트 이해와 발표 준비
+
+## 1. 내가 만든 것
+
+**여행 일정 변경 요청을 읽고, 컴퓨터가 처리할 조건으로 바꾸는 NLP 모델과 실험이다.** 런던 일정과 날씨를 넣은 화면은 그 결과를 보여주는 데모다.
+
+예: “갤러리는 유지하고, 호텔엔 7시까지 돌아가고, 걷는 건 줄여줘.”
+
+- 모델: 유지할 장소 / 귀가 제한 시간 / 도보 선호를 JSON으로 추출한다.
+- 검증 코드: JSON 구조와 값의 형식을 확인한다. 내용이 맞는지까지 보장하지는 않는다.
+- 데모: 추출된 조건을 간단한 규칙으로 일정에 반영한다. 비가 오면 산책 대신 북카페라는 대안을 표시한다.
+
+언어 해석은 Transformer 모델이 한다. 일정에 조건을 적용하는 부분은 직접 작성한 규칙이다. 상용 여행 플래너 전체를 만든 것은 아니다.
+
+## 2. 데이터 400개는 무엇인가
+
+일정과 요청문, 정답 JSON을 묶은 합성 예제 400개다. 기본 상황 100개에 각각 표현을 4개씩 붙였다.
+
+- 280개: 모델 학습용.
+- 40개: 개발·검증용. 학습 중 손실 확인은 매번 전체가 아니라 두 배치를 사용했다.
+- 80개: 마지막 성능 비교용. 학습하거나 프롬프트를 고르는 데 사용하지 않았다.
+
+같은 상황의 표현 4개는 반드시 같은 분할에 넣었다. 분할 사이에 똑같은 요청문은 없지만 비슷한 의도와 패턴은 반복된다. 따라서 400개의 완전히 독립적인 실제 사용자 대화라고 말하면 안 된다.
+
+**정답은 AI가 작성·검수하고 자동 검사했다. 사람 검수 완료로 표시한 예제는 0개다.** 발표 때 이 점을 숨기지 않는다. 이후 네가 실제로 확인한 범위만 직접 검수했다고 말할 수 있다.
+
+## 3. 어떤 모델을 비교했나
+
+1. 작은 Qwen 0.5B에 지시문만 주기: 학습 전 기준선.
+2. 같은 모델을 280개로 LoRA 학습하기: 프로젝트의 핵심.
+3. 큰 Qwen 7B에 학습 데이터 중 예시 두 개를 보여주기: 큰 모델 프롬프팅 비교.
+
+LoRA는 기존 모델 전체를 다시 학습하지 않고 작은 추가 가중치만 학습하는 방식이다. 이번에는 약 73만 개 파라미터를 학습했다. 840번 업데이트, 데이터 세 바퀴다. GPU 학습이 중단되어 기본 모델에서 CPU로 새로 시작했고, 끝까지 학습한 가중치를 다시 읽어 검사했다.
+
+세 모델의 테스트와 출력 형식은 같다. 큰 모델만 4비트이고 예시도 두 개 받으므로, 모든 차이를 모델 크기 때문이라고 단정할 수 없다.
+
+## 4. 결과를 읽는 법
+
+| 방법 | 조건 추출 F1 | 요청 전체를 완전히 맞힌 수 | 올바른 JSON 비율 |
+| --- | ---: | ---: | ---: |
+'''+ '\n'.join(result_ko)+f'''
+
+F1은 **추출한 조건이 맞는 정도와 필요한 조건을 빠뜨리지 않은 정도를 함께 보는 점수**다. 단순히 “문장 {lo['f1']:.1%}를 맞혔다”는 뜻이 아니다.
+
+학습한 모델은 요청 전체를 **{round(lo['exact_record_accuracy']*80)}/80개** 완전히 맞혔다. 이 경우에는 조건 누락, 값, 필수/선호, 추가 확인 여부까지 모두 맞아야 한다. JSON 형식이 틀리면 조건을 뽑지 못한 것으로 채점했다. 기준선의 낮은 점수에는 형식을 지키지 못한 영향도 포함된다.
+
+필수/선호 정확도 {lo['priority_accuracy_on_matched']:.1%}는 **이미 내용이 맞게 추출된 조건에 한정한 값**이다. 전체 요청에서 그 정도로 성공했다는 뜻이 아니다. 시간의 <= / = / >= 구분과 도보 제한의 범위가 특히 중요한 실패 원인이다. 실제 실패는 experiments/results/error_analysis.json에 남겼다.
+
+이 결과로 말할 수 있는 것: “통제된 합성 데이터에서 작은 모델의 과제 학습 효과를 측정했다.” 실제 여행자에게도 같은 정확도라는 주장은 하지 않는다.
+
+## 5. 런던과 날씨는 어떻게 연결되나
+
+- 요청의 “비 오면 북카페, 안 오면 산책”을 모델이 두 조건으로 보존한다.
+- 날씨 모듈이 Open-Meteo / ECMWF의 런던 예보를 받는다.
+- 비 여부에 맞는 조건만 일정에 적용한다. 예보 범위 밖이면 판단을 보류한다.
+- 화면의 Rain / Dry simulation은 기능 확인용 가상 날씨이며 실제 예보처럼 표시하지 않는다.
+- 장소는 출처를 기록한 OpenStreetMap 자료다. 영업시간·예약 가능 여부는 검증하지 않았다.
+
+도보 최소화는 선호로 기록하지만 실제 최단 경로를 계산하지 않는다. 북카페도 특정 가게가 확정된 것이 아니라 대체 장소의 종류다. 이것이 점수에 반영되는 NLP 과제의 범위와 데모의 범위다.
+
+## 6. 화면 실행과 발표 순서
+
+프로젝트 폴더에서 `python3 demo/app.py`를 실행하고 http://127.0.0.1:8765 를 연다. 저장된 실제 모델 결과는 다운로드 없이 볼 수 있다. 새 문장을 직접 넣으려면 README의 MLX 설치와 작은 모델 다운로드가 필요하다.
+
+1. 복합 요청의 조건 여섯 개를 보여준다.
+2. Rain simulation으로 바꿔 실내 대안을 보여준다.
+3. Dry simulation으로 바꿔 산책 유지 결과를 보여준다.
+4. 모호한 시간 예제를 골라 값을 지어내지 않고 보류하는 것을 설명한다.
+
+발표 슬라이드는 6장이다. 영어 원고는 presentation_script.md와 PPTX 발표자 노트에 있다. **타이머로 4분 30초 안팎을 연습하고 5분을 넘기지 않는다.** 데모를 실시간 시연한다면 원고의 일부 설명을 줄인다. 슬라이드에 실제 화면이 있어 시연 없이도 발표할 수 있다.
+
+## 7. 질문을 받으면 설명할 핵심
+
+- **왜 NLP 과제인가?** 핵심 학습과 평가는 자연어에서 조건을 구조화하는 Transformer 모델에 있다.
+- **왜 JSON인가?** 출력 구조를 고정하면 프로그램에 연결하고 정답과 일관되게 비교할 수 있기 때문이다. 키 이름은 우리가 정의한 계약이다.
+- **왜 400개인가?** 수업 일정 안에서 통제된 소규모 학습·비교를 하기 위한 규모다. 실제 서비스 일반화에 충분하다고 입증한 수치는 아니다.
+- **어디까지 학습했나?** 사전학습 모델에 LoRA를 추가 학습했다. 날씨를 모델에 외우게 하거나 여행 경로 자체를 학습한 것은 아니다.
+- **왜 결과가 완벽하지 않나?** 작은 합성 데이터와 제한된 모델로 복합 조건·모호성까지 처리하기 때문이다. 실패까지 남기고 분석하는 것이 실험이다.
+- **AI는 무엇을 도왔나?** 코드, 합성 데이터, 실험 실행, 문서 작성에 도움을 받았다. 실제 실행한 결과를 보고했고, 사람이 검수하지 않은 자료는 그렇게 표시했다.
+
+## 8. 제출 전 네가 할 일
+
+1. 이 문서와 보고서를 읽고 실제로 한 일과 한계를 확인한다.
+2. 데모를 열어 조건 추출·비/맑음 전환을 직접 본다.
+3. 발표 원고를 시간 재며 연습한다. 이해되지 않는 표현은 네 말로 바꾼다.
+4. 수업의 AI 사용 규정과 제출 형식을 확인하고 ZIP을 제출한다. 제출 자체는 자동으로 하지 않았다.
+'''
+    (ROOT/'docs/understanding_ko.md').write_text(ko)
+    print(json.dumps({'written':['README.md','docs/understanding_ko.md']}))
+
+
+if __name__=='__main__': main()

@@ -39,3 +39,6 @@ wandb/
 
 # Submission archives
 /submission*.zip
+
+# One deliberately distributed, small LoRA artifact
+!artifacts/qwen05_lora/adapters.safetensors

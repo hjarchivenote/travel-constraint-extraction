@@ -1,0 +1,257 @@
+[
+  {
+    "id": "combined_03_0",
+    "family": "combined",
+    "input": {
+      "city": "London",
+      "reference_itinerary": [
+        {
+          "id": "gallery_visit",
+          "place": "The Courtauld Gallery",
+          "time": "10:15"
+        },
+        {
+          "id": "lunch",
+          "time": "12:30"
+        },
+        {
+          "id": "outdoor_walk",
+          "place": "South Bank",
+          "time": "14:00"
+        },
+        {
+          "id": "museum_visit",
+          "place": "Sir John Soane's Museum",
+          "time": "16:00"
+        },
+        {
+          "id": "hotel_return",
+          "time": "20:30"
+        }
+      ],
+      "change_request": "Put lunch near The Courtauld Gallery. Retain the walk without rain, or replace it with a book cafe if rain arrives. Keep Sir John Soane's Museum in any weather. Hotel arrival must stay exactly 20:30. Prefer the least walking overall."
+    },
+    "prediction": {
+      "constraints": [
+        {
+          "type": "place",
+          "target": "lunch",
+          "operator": "near",
+          "value": "The Courtauld Gallery",
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": null
+        },
+        {
+          "type": "weather",
+          "target": "outdoor_walk",
+          "operator": "keep",
+          "value": null,
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": {
+            "weather": "rain",
+            "occurs": false
+          }
+        },
+        {
+          "type": "weather",
+          "target": "outdoor_walk",
+          "operator": "replace_with",
+          "value": "book_cafe",
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": {
+            "weather": "rain",
+            "occurs": true
+          }
+        },
+        {
+          "type": "place",
+          "target": "place_visit",
+          "operator": "include",
+          "value": "Sir John Soane's Museum",
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": null
+        },
+        {
+          "type": "time",
+          "target": "hotel_return",
+          "operator": "=",
+          "value": "20:30",
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": null
+        },
+        {
+          "type": "walking",
+          "target": "walking_amount",
+          "operator": "minimize",
+          "value": null,
+          "priority": "soft",
+          "needs_clarification": false,
+          "condition": null
+        }
+      ]
+    },
+    "raw_output": "{\"constraints\": [{\"type\": \"place\", \"target\": \"lunch\", \"operator\": \"near\", \"value\": \"The Courtauld Gallery\", \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": null}, {\"type\": \"weather\", \"target\": \"outdoor_walk\", \"operator\": \"keep\", \"value\": null, \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": {\"weather\": \"rain\", \"occurs\": false}}, {\"type\": \"weather\", \"target\": \"outdoor_walk\", \"operator\": \"replace_with\", \"value\": \"book_cafe\", \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": {\"weather\": \"rain\", \"occurs\": true}}, {\"type\": \"place\", \"target\": \"place_visit\", \"operator\": \"include\", \"value\": \"Sir John Soane's Museum\", \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": null}, {\"type\": \"time\", \"target\": \"hotel_return\", \"operator\": \"=\", \"value\": \"20:30\", \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": null}, {\"type\": \"walking\", \"target\": \"walking_amount\", \"operator\": \"minimize\", \"value\": null, \"priority\": \"soft\", \"needs_clarification\": false, \"condition\": null}]}",
+    "inference_seconds": 16.1552,
+    "model": "Qwen2.5-0.5B-Instruct + LoRA",
+    "adapter_sha256": "1b859f9ac33af1e5a7b9f5be78d3f0b3d22bf6e973019f029dc1e2a4fcbfff63",
+    "source": "Actual saved validation prediction, not a held-out test example"
+  },
+  {
+    "id": "walking_minimize_08_0",
+    "family": "walking_minimize",
+    "input": {
+      "city": "London",
+      "reference_itinerary": [
+        {
+          "id": "gallery_visit",
+          "place": "National Gallery",
+          "time": "10:40"
+        },
+        {
+          "id": "lunch",
+          "time": "12:30"
+        },
+        {
+          "id": "outdoor_walk",
+          "place": "South Bank",
+          "time": "14:00"
+        },
+        {
+          "id": "museum_visit",
+          "place": "Tate Modern",
+          "time": "16:00"
+        },
+        {
+          "id": "hotel_return",
+          "time": "21:20"
+        }
+      ],
+      "change_request": "Choose an itinerary with as little walking as possible."
+    },
+    "prediction": {
+      "constraints": [
+        {
+          "type": "walking",
+          "target": "walking_amount",
+          "operator": "minimize",
+          "value": null,
+          "priority": "soft",
+          "needs_clarification": false,
+          "condition": null
+        }
+      ]
+    },
+    "raw_output": "{\"constraints\": [{\"type\": \"walking\", \"target\": \"walking_amount\", \"operator\": \"minimize\", \"value\": null, \"priority\": \"soft\", \"needs_clarification\": false, \"condition\": null}]}",
+    "inference_seconds": 3.4789,
+    "model": "Qwen2.5-0.5B-Instruct + LoRA",
+    "adapter_sha256": "1b859f9ac33af1e5a7b9f5be78d3f0b3d22bf6e973019f029dc1e2a4fcbfff63",
+    "source": "Actual saved validation prediction, not a held-out test example"
+  },
+  {
+    "id": "ambiguous_time_04_0",
+    "family": "ambiguous_time",
+    "input": {
+      "city": "London",
+      "reference_itinerary": [
+        {
+          "id": "gallery_visit",
+          "place": "National Gallery",
+          "time": "10:20"
+        },
+        {
+          "id": "lunch",
+          "time": "12:30"
+        },
+        {
+          "id": "outdoor_walk",
+          "place": "South Bank",
+          "time": "14:00"
+        },
+        {
+          "id": "museum_visit",
+          "place": "Tate Modern",
+          "time": "16:00"
+        },
+        {
+          "id": "hotel_return",
+          "time": "20:40"
+        }
+      ],
+      "change_request": "An early return to my hotel is compulsory, though I haven't specified a clock time."
+    },
+    "prediction": {
+      "constraints": [
+        {
+          "type": "time",
+          "target": "hotel_return",
+          "operator": "<=",
+          "value": null,
+          "priority": "hard",
+          "needs_clarification": true,
+          "condition": null
+        }
+      ]
+    },
+    "raw_output": "{\"constraints\": [{\"type\": \"time\", \"target\": \"hotel_return\", \"operator\": \"<=\", \"value\": null, \"priority\": \"hard\", \"needs_clarification\": true, \"condition\": null}]}",
+    "inference_seconds": 3.9114,
+    "model": "Qwen2.5-0.5B-Instruct + LoRA",
+    "adapter_sha256": "1b859f9ac33af1e5a7b9f5be78d3f0b3d22bf6e973019f029dc1e2a4fcbfff63",
+    "source": "Actual saved validation prediction, not a held-out test example"
+  },
+  {
+    "id": "hotel_time_06_0",
+    "family": "hotel_time",
+    "input": {
+      "city": "London",
+      "reference_itinerary": [
+        {
+          "id": "gallery_visit",
+          "place": "National Gallery",
+          "time": "10:30"
+        },
+        {
+          "id": "lunch",
+          "time": "12:30"
+        },
+        {
+          "id": "outdoor_walk",
+          "place": "South Bank",
+          "time": "14:00"
+        },
+        {
+          "id": "museum_visit",
+          "place": "Sir John Soane's Museum",
+          "time": "16:00"
+        },
+        {
+          "id": "hotel_return",
+          "time": "21:00"
+        }
+      ],
+      "change_request": "I have to arrive at the hotel at or before 19:30."
+    },
+    "prediction": {
+      "constraints": [
+        {
+          "type": "time",
+          "target": "hotel_return",
+          "operator": "<=",
+          "value": "19:30",
+          "priority": "hard",
+          "needs_clarification": false,
+          "condition": null
+        }
+      ]
+    },
+    "raw_output": "{\"constraints\": [{\"type\": \"time\", \"target\": \"hotel_return\", \"operator\": \"<=\", \"value\": \"19:30\", \"priority\": \"hard\", \"needs_clarification\": false, \"condition\": null}]}",
+    "inference_seconds": 2.2553,
+    "model": "Qwen2.5-0.5B-Instruct + LoRA",
+    "adapter_sha256": "1b859f9ac33af1e5a7b9f5be78d3f0b3d22bf6e973019f029dc1e2a4fcbfff63",
+    "source": "Actual saved validation prediction, not a held-out test example"
+  }
+]

@@ -25,6 +25,9 @@ def main():
     parser.add_argument("--few-shot", type=int, default=0)
     parser.add_argument("--max-tokens", type=int, default=512)
     parser.add_argument("--purpose", choices=["pilot", "final"], default="pilot")
+    parser.add_argument("--accept-ai-reviewed", action="store_true",
+                        help="Explicitly evaluate frozen AI-reviewed synthetic labels without claiming human review")
+    parser.add_argument("--expected-dataset-sha256")
     args = parser.parse_args()
     if args.split == "test" and args.purpose != "final":
         raise SystemExit("Held-out test examples cannot be used for development runs.")
@@ -37,20 +40,31 @@ def main():
     from mlx_lm.sample_utils import make_sampler
 
     records = [json.loads(line) for line in Path(args.records).read_text().splitlines() if line.strip()]
+    dataset_sha256 = hashlib.sha256(Path(args.records).read_bytes()).hexdigest()
+    if args.expected_dataset_sha256 and dataset_sha256 != args.expected_dataset_sha256:
+        raise SystemExit("Dataset differs from the frozen experiment protocol.")
+    if args.accept_ai_reviewed and not args.expected_dataset_sha256:
+        raise SystemExit("AI-reviewed evaluation requires an explicitly frozen dataset hash.")
+    def reviewed(record):
+        metadata = record["metadata"]
+        ai_review = metadata.get("ai_review", {})
+        return metadata.get("human_reviewed", False) or (
+            args.accept_ai_reviewed and ai_review.get("status") == "first_pass_complete"
+            and ai_review.get("human_review") is False)
     selected_ids = set(json.loads(Path(args.ids).read_text())) if args.ids else None
     selected = [record for record in records if record["split"] == args.split
                 and (args.family is None or record["family"] == args.family)
                 and (selected_ids is None or record["id"] in selected_ids)][:args.limit]
     if not selected:
         raise SystemExit("No records match the requested split.")
-    if args.purpose == "final" and any(not record["metadata"]["human_reviewed"] for record in selected):
+    if args.purpose == "final" and any(not reviewed(record) for record in selected):
         raise SystemExit("Final evaluation requires reviewed reference annotations.")
     train = [record for record in records if record["split"] == "train"]
     preferred = [next((record for record in train if record["family"] == family), None)
                  for family in ("combined", "walking_limit")] if args.few_shot else []
     preferred = [record for record in preferred if record is not None]
     demonstrations = (preferred + [record for record in train if record not in preferred])[:args.few_shot]
-    if args.purpose == "final" and any(not record["metadata"]["human_reviewed"] for record in demonstrations):
+    if args.purpose == "final" and any(not reviewed(record) for record in demonstrations):
         raise SystemExit("Final prompting requires reviewed few-shot demonstrations.")
     mx.random.seed(42)
     started = time.perf_counter()
@@ -89,6 +103,8 @@ def main():
                 "mlx_lm_version": importlib.metadata.version("mlx-lm"),
                 "platform": platform.platform(),
                 "purpose": args.purpose,
+                "dataset_sha256": dataset_sha256,
+                "reference_review": "human" if record["metadata"].get("human_reviewed") else "AI-reviewed synthetic",
             }
             handle.write(json.dumps(result, ensure_ascii=False) + "\n")
             handle.flush()

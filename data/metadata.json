@@ -1,0 +1,33 @@
+{
+  "records": 400,
+  "scenario_groups": 100,
+  "split_records": {
+    "test": 80,
+    "train": 280,
+    "validation": 40
+  },
+  "seed": 42,
+  "human_reviewed_records": 0,
+  "status": "frozen_AI_reviewed_synthetic",
+  "corpus_version": 2,
+  "generation_method": "100 reference scenarios, four paraphrases each; separate authored wording pools per split",
+  "limitation": "Synthetic language. Intents, semantic frames and within-split wording repeat; no exact request text crosses splits. Not a real-user benchmark.",
+  "test_policy": "Wording authored and AI-reviewed before v2 model experiments; final held-out evaluation follows experiments/protocol.json.",
+  "ai_reviewed_records": 400,
+  "review": {
+    "review_id": "ai-review-2026-10-28-v2",
+    "reviewer": "Codex (AI)",
+    "status": "first_pass_complete",
+    "scope": "AI semantic review of authored wording patterns and instantiated values, plus consistency checks on all 400 records",
+    "human_review": false
+  },
+  "corrections": [
+    "Distinct train/validation/test wording pools; 37 original cross-split duplicate-request groups removed",
+    "Both galleries now have hard and soft inclusion requests",
+    "Awkward nearby-lunch wording corrected"
+  ],
+  "dataset_file": "travel_requests.jsonl",
+  "frozen_on": "2026-10-29",
+  "dataset_sha256": "19466ef251eaa6fa81db7014e5ee9e180e95c71deb2b103e2b06f4df6e231aa5",
+  "evaluation_policy": "Held-out test evaluation explicitly accepts AI-reviewed labels with a fixed hash; this does not imply human verification."
+}

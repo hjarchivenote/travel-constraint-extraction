@@ -119,6 +119,7 @@ def main():
     else:
         records = [record for record in records if record["split"] == args.split]
     summary = summarize(records, predictions)
+    Path(args.output).parent.mkdir(parents=True, exist_ok=True)
     Path(args.output).write_text(json.dumps(summary, indent=2) + "\n")
     print(json.dumps(summary, indent=2))
 

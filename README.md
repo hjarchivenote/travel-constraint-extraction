@@ -1,145 +1,106 @@
 # Travel Constraint Extraction
 
-Extract structured constraints from natural-language requests to change a travel itinerary, and compare a fine-tuned small Transformer with larger-model prompting.
+**Fine-tune a small Transformer to extract structured conditions from English requests to change a London itinerary.**
 
-**Status: the extraction contract, dataset generator, MLX training/inference pipeline, evaluation code, and London weather backend are implemented. Local development runs have started. Human annotation review and final held-out evaluation remain pending.**
+The completed project includes a 400-record synthetic corpus, a trained LoRA adapter, a frozen three-model comparison, raw predictions and error analysis, and a local demonstration with weather-dependent plan edits.
 
-## Project goal
+![London, Replanned interface](docs/images/demo.png)
 
-Given a short reference itinerary and an English change request, identify the requirements that an itinerary adjustment should follow. The core task is NLP: extracting conditions, distinguishing hard constraints from soft preferences, and flagging requests that need clarification. The demonstration is set in central London and will use weather forecasts as contextual information for simple itinerary adjustments.
+## Task
 
-The project investigates whether task-specific fine-tuning can improve a small model's extraction performance, and how its accuracy and inference time compare with a larger model. Improvements are hypotheses to test; no final held-out performance results are available yet.
+Input: a short reference itinerary and a change request such as “Keep the gallery, return by 19:00, and reduce walking.” Output: JSON constraints recording the requested place, time operator and value, hard/soft priority, clarification needs, and any rain/dry condition. Relative phrases resolve against the reference itinerary. Missing information stays unresolved instead of receiving an invented value.
 
-## Example task
+The **NLP model performs extraction**. A strict JSON/schema validator checks the output. A small deterministic planner then demonstrates how those conditions affect an itinerary. Weather and map data support that demonstration; route optimization is outside scope.
 
-**Reference itinerary:** Visit the National Gallery, have lunch, walk along the South Bank, and return to the hotel at 20:00. These times are illustrative reference settings.
+## Held-out results
 
-**Change request:** "Keep the National Gallery visit. I must be back at the hotel by 19:00, and I would prefer less walking."
+| Approach | Content F1 | Fully correct records | Valid JSON | Mean generation seconds |
+| --- | ---: | ---: | ---: | ---: |
+| 0.5B baseline, zero-shot | 0.000 | 0/80 | 0.0% | 19.42 |
+| 0.5B + LoRA, zero-shot | 0.795 | 57/80 | 97.5% | 3.93 |
+| 7B 4-bit, two-shot | 0.782 | 51/80 | 93.8% | 30.01 |
 
-Expected information to extract:
+Same **80 inputs from 20 reference groups**, temperature 0, seed 42, 768-token generation limit, strict schema, and no response repair. Content F1 matches constraint content; exact records additionally require all priorities and clarification flags. Invalid outputs count as empty extraction, so schema compliance can strongly affect F1. Priority accuracy must be read with recall because it is computed only on matched constraints.
 
-| Condition | Value | Requirement type |
-| --- | --- | --- |
-| Place to keep | National Gallery | Hard constraint |
-| Latest hotel return | 19:00 | Hard constraint |
-| Walking preference | Less walking | Soft preference |
-| Clarification needed | No | - |
+**These are AI-reviewed synthetic labels, with zero human-verified records.** The corpus contains 100 scenarios × four paraphrases, split 280/40/80 by scenario. There are 400 unique full inputs and 252 distinct request texts; no identical request text crosses splits, but intents and wording patterns repeat. This is a controlled extraction experiment, not a real-user benchmark.
 
-The model returns structured JSON using the [output schema](src/travel_constraints/output_schema.json). The [shared contract](src/travel_constraints/contract.py) defines the extraction instructions. The example above illustrates the task; it is not a reported prediction.
+The 7B model differs in capacity, 4-bit quantization, and two-shot prompting. Generation timing includes prompt processing and the first request after load; model loading is separate. These measurements do not isolate model size or establish general inference-speed rankings. See the [frozen protocol](experiments/protocol.json), [full metrics and bootstrap intervals](experiments/results/comparison.json), and [actual errors](experiments/results/error_analysis.json).
 
-## Scope
+## Run the demonstration
 
-- English, single-turn change requests with a short reference itinerary.
-- Central London, a one-day itinerary, and walking as the initial travel mode.
-- Place inclusion and exclusion, time constraints, and walking limits or preferences.
-- Hard constraints versus soft preferences, with an explicit clarification flag for ambiguous requests.
-- A simple itinerary-adjustment demonstration using extracted conditions and weather-forecast context.
+Saved validation predictions work with standard Python and no downloaded language model:
 
-London place information and weather forecasts support the demonstration. Custom change requests and their reviewed constraint annotations will form the final NLP dataset. Weather-dependent actions carry an explicit `condition`, preserving both rain/no-rain alternatives. The weather backend retrieves a forecast and selects applicable conditions; a complete itinerary interface and routing system have not been implemented.
-
-Planned demonstration sources are [OpenStreetMap](https://www.openstreetmap.org/copyright) for London place information and [Open-Meteo](https://open-meteo.com/) for weather forecasts. Published source-derived data will include the relevant attribution and license information. Reproducible experiments will use fixed weather snapshots; a live demonstration can request a fresh forecast and identify its retrieval time.
-
-Live routing, booking, and real-time place information are outside the initial scope. The demonstration will use clearly identified reference itineraries rather than imply that fictional examples are current travel advice.
-
-## Planned model comparison
-
-| Approach | Model | Adaptation |
-| --- | --- | --- |
-| Small-model baseline | [Qwen2.5-0.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct) | Prompting without task-specific fine-tuning |
-| Fine-tuned small model | Qwen2.5-0.5B-Instruct | Supervised fine-tuning with LoRA |
-| Larger-model comparison | [Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) | Few-shot prompting without fine-tuning |
-
-All three approaches will use the same output schema and held-out test set. Prompts, model revisions, hardware, precision or quantization, and inference settings will be recorded to make the comparison interpretable.
-
-## Planned dataset
-
-The target is **400 custom examples in total**, including training, validation, and test examples. This is a collection target, not an established minimum or a guarantee of model performance.
-
-The generator produces **400 synthetic candidates: 100 reference scenarios with four paraphrases per scenario**, split 280/40/80. The v2 corpus has completed a first AI review and all-record consistency checks; see the [review record](data/ai_review_v2.json). It contains 400 distinct model inputs and 252 distinct request texts. Separate wording pools prevent identical request sentences from crossing splits. Both gallery names occur with hard and soft inclusion requests. These candidates are **not human-verified** and remain in ignored `outputs/corpus_reviewed_v2/`. Intent families and wording within each split repeat, so this is a controlled synthetic task, not a real-user benchmark.
-
-Each example will contain:
-
-- A short reference itinerary set in London.
-- An English change request.
-- A manually verified structured target containing the requested constraints.
-
-The annotation-review milestone is a **30–50-example pilot**. Initial development runs use automatically constructed candidates to verify execution, not to claim final accuracy. The generator covers explicit requirements, preferences, multiple conditions, negation, unresolved values, and conditional replacements. AI assistance and subsequent human review are recorded separately.
-
-Splits are organized by reference scenario: a scenario and all its paraphrases stay in the same split. The splits use separately authored wording pools while sharing task intents. Test wording was revised during data review without using model predictions; no v2 model evaluation has been run. Test examples must not be used for prompt selection or training decisions. Synthetic test results will support conclusions about this controlled task, not real travelers' requests.
-
-## Planned evaluation
-
-- **Constraint extraction precision, recall, and F1:** using matching and normalization rules defined before final evaluation.
-- **Hard/soft classification accuracy:** on matched constraints, reported alongside extraction F1 so missed constraints remain visible.
-- **JSON validity rate:** the proportion of outputs that satisfy the agreed schema.
-- **Inference time:** with hardware, model precision, and measurement conditions documented.
-- **Error analysis:** examples of missed conditions, incorrect values, requirement-type errors, and ambiguity handling.
-
-Matching is one-to-one and ignores constraint ordering. Content matches include the condition, target, operator, value, unit, and scope; requirement strength and clarification are scored separately on matches. Strict JSON/schema failures receive no extracted constraints. Expected record IDs are checked so missing predictions cannot silently disappear from a reported score. Development checks must not be presented as final test results.
-
-If time permits, a learning-curve experiment will compare different training-set sizes while keeping the validation and test sets fixed.
-
-## Repository structure
-
-```text
-.
-├── README.md
-├── data/          # Dataset, provenance, annotation guidance, and splits
-├── src/           # Extraction, training, inference, and evaluation code
-├── experiments/   # Experiment settings, result tables, and error analysis
-├── demo/          # A small interface demonstrating extraction and itinerary changes
-└── docs/          # Project report, presentation, and supporting figures
+```bash
+python3 demo/app.py
 ```
 
-## Roadmap
+Open <http://127.0.0.1:8765>. Saved examples are actual model outputs, clearly labeled and separate from the held-out test. Changing the text selects live mode. Rain/dry controls are labeled simulations; forecast mode uses a timestamped Open-Meteo / ECMWF snapshot and supports refreshing it.
 
-- [x] Create the repository structure and project overview.
-- [x] Implement the output contract, extraction instructions, and one-to-one matching metrics.
-- [x] Implement a reproducible generator for 400 candidates with scenario-disjoint splits.
-- [x] Complete the first AI data review, remove cross-split identical requests, and check all 400 annotations for consistency.
-- [x] Run local small-model inference and short LoRA training with saved adapter reload.
-- [x] Run the quantized 7B comparison model on a development request.
-- [x] Retrieve London forecasts and implement rain-conditional activation.
-- [ ] Build and review the 30–50-example pilot.
-- [ ] Complete human review and freeze the 400-example dataset and its splits.
-- [ ] Run the small-model baseline, LoRA fine-tuning, and larger-model prompting comparison.
-- [ ] Evaluate the models and analyze errors.
-- [ ] Build the simple demonstration and add screenshots.
-- [ ] Complete the report, presentation, and reproducibility instructions.
-
-## Running the project
-
-Tested environment: **Apple M2, 16 GB unified memory, macOS 26.5.2, Python 3.13.7**. The model runtime uses [MLX LM](https://github.com/ml-explore/mlx-lm), with [LoRA training](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LORA.md) on the Apple GPU. The 7B comparison uses a pinned 4-bit MLX conversion; this precision difference must be reported when discussing speed or accuracy.
+For **live model inference on Apple Silicon**:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
-PYTHONPATH=src .venv/bin/python -m travel_constraints.build_data --output outputs/corpus_reviewed_v2
-PYTHONPATH=src .venv/bin/python -m travel_constraints.train --model small --records outputs/corpus_reviewed_v2/records.jsonl --data outputs/corpus_reviewed_v2/pilot_training --adapter outputs/runtime/v2_pilot_adapter
-PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --records outputs/corpus_reviewed_v2/records.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/baseline.jsonl
-PYTHONPATH=src .venv/bin/python -m travel_constraints.infer --model small --adapter outputs/runtime/v2_pilot_adapter --records outputs/corpus_reviewed_v2/records.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --limit 4 --output outputs/runtime/adapted.jsonl
-PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records outputs/corpus_reviewed_v2/records.jsonl --predictions outputs/runtime/adapted.jsonl --ids outputs/corpus_reviewed_v2/pilot_training/validation_ids.json --output outputs/runtime/adapted_metrics.json
-PYTHONPATH=src .venv/bin/python -m travel_constraints.weather
+.venv/bin/python demo/app.py
+```
+
+The published adapter is loaded from `artifacts/qwen05_lora/`. No paid LLM API is required. See the [demo guide](demo/README.md). The first request loads the base model; model predictions can be wrong, and schema errors are displayed without correction.
+
+## Training and reproducibility
+
+Tested on **Apple M2, 16 GB unified memory, macOS 26.5.2, Python 3.13.7**, with pinned MLX dependencies in `requirements.txt`.
+
+- Small model: `Qwen/Qwen2.5-0.5B-Instruct`, revision `7ae557604adf67be50417f59c2c2f167def9a775`, bfloat16.
+- Large comparison: `mlx-community/Qwen2.5-7B-Instruct-4bit`, revision `c26a38f6a37d0a51b4e9a1eb3026530fa35d9fed`.
+- LoRA: last four layers, rank 8, scale 20, 733,184 trainable parameters; Adam, learning rate 0.0001, batch 1, seed 42, 840 steps (three epochs), prompt loss masked, sequence cap 1,024.
+- Final training completed on CPU after a failed GPU attempt. Failed weights were not reused. The trainer reported 6,008.016 seconds; all 56 saved adapter tensors were reloaded and matched exactly. Validation pool: 40 records, two batches sampled per loss check.
+- Dataset and schema hashes, split IDs, training settings, model revisions, and inference provenance are retained. There was one completed training seed; no test-driven prompt or label changes.
+
+Evaluate new runs separately without overwriting the submitted results:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models all
+PYTHONPATH=src .venv/bin/python experiments/run_comparison.py --output outputs/reproduction/results --runtime outputs/reproduction/runtime
+```
+
+This uses the published adapter when the original local training directory is absent. The frozen protocol preserves the original path as provenance. The runner refuses partial files rather than silently replacing them. Exact numerical reproduction can vary with runtime and hardware.
+
+Recompute a submitted model's aggregate scores without inference:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m travel_constraints.metrics --records data/travel_requests.jsonl --predictions experiments/results/small_lora.jsonl --split test --output outputs/recomputed_lora_metrics.json
 PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 ```
 
-The default training command is an execution pilot, not final training. It masks prompt tokens and updates LoRA adapters in the last four layers. The corpus builder refuses accidental overwrites, and the trainer checks splits, exported annotations, and token lengths. Final-mode training/evaluation requires reviewed labels. Models, adapters, generated candidates, and development outputs remain local. Only completed implementation units and reviewed artifacts are published.
+The data builder and training launcher are retained for inspection. Their historical `final` training gate requires human-reviewed annotations; this experiment keeps all human-review flags false and records its full synthetic training run separately. Releasing the adapter does not imply that this gate was bypassed or that labels were human approved.
 
-Local GPU development runs have encountered intermittent Metal `Impacting Interactivity` failures. Training saves periodic checkpoints and preserves failed-run logs. A short CPU training check also completed; `train --device cpu --adapter outputs/runtime/cpu_run` selects that slower alternative without changing system GPU settings. Longer CPU training has not yet been verified. Resuming an adapter restores its weights, not the optimizer state, and must be recorded as a separate run.
+## London sources and boundaries
 
-The trainer also accepts `--disable-compile`, using the documented [MLX compilation diagnostic setting](https://ml-explore.github.io/mlx/build/html/usage/compile.html). One GPU diagnostic with six-condition requests completed 10 training steps in 35.864 seconds and saved checkpoints. This short check does not establish the cause of the intermittent failure or prove stability over a full training run. Compilation settings are recorded in each run manifest.
+Six reference locations come from **© OpenStreetMap contributors**, ODbL, with source/snapshot metadata. A nearby cafe candidate uses straight-line distance, not a walking route. Opening hours and availability are unverified; book cafe is a requested category until a venue is selected.
 
-The London weather backend requests ECMWF IFS 0.25° data. Rain/showers are preceding-hour totals; a 14:00–15:00 activity uses the bucket ending at 15:00. The demonstration uses a configurable 0.1 mm/hour rain-plus-showers threshold, conservatively considers overlapping partial hours, and preserves unknown weather as pending rather than assuming dry conditions. See [Open-Meteo's hourly variable definitions](https://open-meteo.com/en/docs).
+Forecasts are **Open-Meteo / ECMWF, CC BY 4.0**, using ECMWF IFS 0.25°. Rain/showers are preceding-hour totals: 14:00–15:00 uses the bucket ending at 15:00. The 0.1 mm/hour threshold is an application choice. Missing coverage stays unknown. The demo does not guarantee a feasible itinerary, walking cap, or booking.
 
-## Licensing and model attribution
+## Project files
 
-The two planned Qwen models are distributed under Apache 2.0; see the original [0.5B license](https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct/blob/main/LICENSE) and [7B license](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/main/LICENSE). Any redistributed model derivatives will preserve the required license and attribution notices and identify modifications.
+| Path | Contents |
+| --- | --- |
+| `data/` | Frozen 400-record corpus, splits, review provenance, London source snapshots |
+| `src/travel_constraints/` | Contract, generation/audit, training, inference, metrics, weather, planner |
+| `artifacts/qwen05_lora/` | Trained adapter, model card, Apache license and modification notice |
+| `experiments/` | Frozen protocol, training provenance, raw predictions, scores, errors |
+| `demo/` | Local interface, actual validation predictions, run guide |
+| `docs/` | Seven-page report, six-slide deck, speaking notes, Korean explanation, screenshots |
+| `tests/` | Dataset/metric/schema/weather/planner behavior checks |
 
-Original code, dataset, and documentation licensing will be specified before those artifacts are released for reuse. Base-model weights will be referenced through their original repositories. Any released LoRA adapters will include the base-model revision and training details.
+## Submission and authorship
 
-## Author and context
+[Report](docs/travel_constraint_report.pdf) · [Slides (PPTX)](docs/travel_constraint_presentation.pptx) · [Slides (PDF)](docs/travel_constraint_presentation.pdf) · [Korean explanation](docs/understanding_ko.md)
 
-Hyojin Lee · Recent Areas of AI semester project · 2026
+Hyojin Lee · Recent Areas of AI · 2026. Codex assisted with implementation, synthetic labels, consistency checks, experiment execution, and documentation. Human annotation review is not claimed. The report describes this assistance and the experiment's limits.
 
-This repository records the project as it develops. Dataset sizes, evaluation results, and completed features will be updated only when the corresponding work has been completed.
+## Licenses and sources
+
+The Qwen base models use Apache 2.0; the redistributed adapter preserves its [license and modification notice](artifacts/qwen05_lora/NOTICE). Original project materials have no additional blanket reuse license; see [LICENSE_SCOPE.md](LICENSE_SCOPE.md). Third-party data retains its own terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+Technical sources: [Qwen2.5 report](https://arxiv.org/abs/2412.15115), [LoRA paper](https://arxiv.org/abs/2106.09685), [Open-Meteo ECMWF documentation](https://open-meteo.com/en/docs/ecmwf-api), [OpenStreetMap copyright](https://www.openstreetmap.org/copyright).

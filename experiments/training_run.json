@@ -1,0 +1,43 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "dataset_sha256": "19466ef251eaa6fa81db7014e5ee9e180e95c71deb2b103e2b06f4df6e231aa5",
+  "train_records": 280,
+  "validation_records": 40,
+  "test_records_used": 0,
+  "steps": 840,
+  "epochs": 3,
+  "batch_size": 1,
+  "learning_rate": 0.0001,
+  "optimizer": "Adam",
+  "seed": 42,
+  "max_sequence_length": 1024,
+  "maximum_observed_example_tokens": 966,
+  "prompt_tokens_masked": true,
+  "lora_layers": 4,
+  "lora_parameters": {
+    "rank": 8,
+    "dropout": 0.0,
+    "scale": 20.0
+  },
+  "trainable_parameters": 733184,
+  "training_device": "CPU",
+  "compilation_disabled": true,
+  "elapsed_seconds_reported_by_trainer": 6008.016,
+  "exit_code": 0,
+  "adapter_sha256": "1b859f9ac33af1e5a7b9f5be78d3f0b3d22bf6e973019f029dc1e2a4fcbfff63",
+  "adapter_reload_exact": true,
+  "adapter_tensors_checked": 56,
+  "mlx_lm_version": "0.32.2",
+  "annotation_review": "AI-assisted template/value review and automated checks; no human-reviewed records",
+  "hardware": "Apple M2, 16 GB unified memory",
+  "gpu_stability_attempt": {
+    "compilation_disabled": true,
+    "completed_steps_before_error": 224,
+    "elapsed_seconds": 440.001,
+    "error": "Metal Impacting Interactivity",
+    "weights_reused_in_final_cpu_run": false
+  },
+  "validation_batches_per_check": 2,
+  "launcher_purpose": "pilot (human-review gate retained); completed full 840-step synthetic experiment"
+}

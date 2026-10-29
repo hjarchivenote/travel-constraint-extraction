@@ -1,15 +1,21 @@
-# Data
+# Dataset
 
-Planned home for the custom travel change-request dataset, finalized annotation guidelines, provenance records, and scenario-based train/validation/test splits.
+`travel_requests.jsonl` is the frozen v2 NLP corpus: **400 synthetic records, 100 reference scenarios × four request paraphrases**. `splits.json` records the 280 training, 40 validation, and 80 test IDs. All paraphrases of a scenario stay together. There are 400 unique full inputs and 252 distinct request texts; no exact request text crosses splits. Shared semantic frames and within-split wording remain.
 
-**Current status:** the local v2 corpus has completed first-pass AI review and all-record consistency checks. Its 400 records in 100 reference-scenario groups remain split 280/40/80. Human review is pending and no human approval is inferred. The [review record](ai_review_v2.json) distinguishes AI review from human review.
+**Annotations are AI-reviewed, not human-verified.** The review covered wording patterns and instantiated values, with automated consistency checks on all records. No human approval is inferred. `metadata.json` and `ai_review_v2.json` record this distinction. Treat scores as a controlled synthetic experiment rather than a real-user benchmark.
 
-Only completed, reviewed NLP artifacts will be published here. The executable [output schema](../src/travel_constraints/output_schema.json) and [prompt contract](../src/travel_constraints/contract.py) define the current format. Generated candidates remain in ignored `outputs/corpus/`; none are marked human-reviewed. Keep each scenario and its paraphrases in the same split and record any subsequent manual changes. Define a dataset license before release for reuse.
+The v2 review removed 37 cross-split duplicate-request groups present in v1 and removed an association between gallery identity and hard/soft labels. These changes preceded v2 model experiments. The frozen dataset SHA-256 is:
 
-The reviewed working copy is `outputs/corpus_reviewed_v2/records.jsonl`; v1 is preserved unchanged in `outputs/corpus/`. The v2 directory contains the AI-review metadata, audit results, full training export in `training/`, and small development export in `pilot_training/`. Use explicit v2 record and data paths for subsequent training. Existing model runs belong to v1 and are not v2 results.
+```text
+19466ef251eaa6fa81db7014e5ee9e180e95c71deb2b103e2b06f4df6e231aa5
+```
 
-V2 removes 37 groups of identical request sentences that previously crossed splits, breaks the association between gallery name and hard/soft labels, and corrects awkward lunch wording. It has 400 distinct model inputs and 252 distinct request texts; within-split repetition and shared semantic intents remain disclosed limitations. No model training or prediction was used to make these corrections.
+The schema and labeling instructions are executable in `src/travel_constraints/output_schema.json` and `contract.py`. Targets must not be altered after seeing held-out predictions to improve a reported score. Any future annotation corrections require a new version and a clearly separated experiment.
 
-The NLP dataset consists of custom requests and target annotations. London place information and weather-forecast records are supporting demonstration data and will be documented with their own sources and applicable terms when used.
+## Supporting London sources
 
-[reference/london_places.json](reference/london_places.json) contains six static reference locations extracted from the previously audited OpenStreetMap snapshot. It includes ODbL attribution, source, dates, and coordinate limitations. This file is not the NLP training dataset and does not assert current opening hours or booking availability.
+`reference/london_places.json` contains six static OpenStreetMap locations with ODbL attribution and snapshot metadata. Coordinates may be feature centroids, not entrances; opening hours and availability are not verified.
+
+`reference/london_forecast.json` is a timestamped Open-Meteo / ECMWF forecast snapshot, under CC BY 4.0. It supports the demonstration, not the training targets. The interface labels forecasts, simulations, and unknown coverage separately. See `THIRD_PARTY_NOTICES.md` for sources and terms.
+
+Original project materials have no additional blanket reuse license; see `LICENSE_SCOPE.md`. Third-party rights and terms remain in force.

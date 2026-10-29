@@ -1,0 +1,8 @@
+Travel Constraint Extraction LoRA adapter
+Base model: Qwen/Qwen2.5-0.5B-Instruct
+Pinned revision: 7ae557604adf67be50417f59c2c2f167def9a775
+Base model license: Apache License 2.0 (included as LICENSE).
+Modification: task-specific LoRA training for 840 updates on the project synthetic dataset.
+Project: Hyojin Lee, Recent Areas of AI, 2026. AI assistance is disclosed in the report.
+Only adapter weights are distributed; original base weights are not included.
+Training configuration paths were normalized for portability.
