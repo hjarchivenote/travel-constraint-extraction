@@ -4,6 +4,39 @@
 
 The completed project includes a 400-record synthetic corpus, a trained LoRA adapter, a frozen three-model comparison, raw predictions and error analysis, and a local demonstration with weather-dependent plan edits.
 
+## Key Results
+
+- **0.5B + LoRA:** **0.795 Content F1**, **57/80 fully correct records**, and **97.5% valid JSON** on the held-out test. See the [full comparison and scoring caveats](#held-out-results).
+- **Data limits:** **400 AI-reviewed synthetic records; 0 human-verified records**, split 280/40/80 for training/validation/test. This is a controlled extraction experiment, not a real-user benchmark.
+- **Comparison limits:** The 0.5B LoRA model uses bfloat16 and zero-shot prompting; the 7B comparison uses 4-bit quantization and two-shot prompting. The results do not isolate model-size, quantization, or prompting effects, and the timings do not establish general inference-speed rankings.
+
+## Technologies
+
+Python · MLX / MLX-LM · Qwen2.5 · LoRA · JSON Schema · HTML / CSS / JavaScript. The demo uses Open-Meteo / ECMWF forecasts and OpenStreetMap reference locations.
+
+Codex assisted with implementation, synthetic labels, consistency checks, experiment execution, and documentation; human annotation review is not claimed. See [submission and authorship](#submission-and-authorship).
+
+## Run the demonstration
+
+From the repository root, saved validation predictions work with standard Python and no downloaded language model:
+
+```bash
+python3 demo/app.py
+```
+
+Open <http://127.0.0.1:8765>. Saved examples are actual model outputs, clearly labeled and separate from the held-out test. Changing the text selects live mode. Rain/dry controls are labeled simulations; forecast mode uses a timestamped Open-Meteo / ECMWF snapshot and supports refreshing it.
+
+For **live model inference on Apple Silicon**:
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
+.venv/bin/python demo/app.py
+```
+
+The published adapter is loaded from `artifacts/qwen05_lora/`. No paid LLM API is required. See the [demo guide](demo/README.md). The first request loads the base model; model predictions can be wrong, and schema errors are displayed without correction.
+
 ![London, Replanned interface](docs/images/demo.png)
 
 ## Task
@@ -25,27 +58,6 @@ Same **80 inputs from 20 reference groups**, temperature 0, seed 42, 768-token g
 **These are AI-reviewed synthetic labels, with zero human-verified records.** The corpus contains 100 scenarios × four paraphrases, split 280/40/80 by scenario. There are 400 unique full inputs and 252 distinct request texts; no identical request text crosses splits, but intents and wording patterns repeat. This is a controlled extraction experiment, not a real-user benchmark.
 
 The 7B model differs in capacity, 4-bit quantization, and two-shot prompting. Generation timing includes prompt processing and the first request after load; model loading is separate. These measurements do not isolate model size or establish general inference-speed rankings. See the [frozen protocol](experiments/protocol.json), [full metrics and bootstrap intervals](experiments/results/comparison.json), and [actual errors](experiments/results/error_analysis.json).
-
-## Run the demonstration
-
-Saved validation predictions work with standard Python and no downloaded language model:
-
-```bash
-python3 demo/app.py
-```
-
-Open <http://127.0.0.1:8765>. Saved examples are actual model outputs, clearly labeled and separate from the held-out test. Changing the text selects live mode. Rain/dry controls are labeled simulations; forecast mode uses a timestamped Open-Meteo / ECMWF snapshot and supports refreshing it.
-
-For **live model inference on Apple Silicon**:
-
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-PYTHONPATH=src .venv/bin/python -m travel_constraints.download_models small
-.venv/bin/python demo/app.py
-```
-
-The published adapter is loaded from `artifacts/qwen05_lora/`. No paid LLM API is required. See the [demo guide](demo/README.md). The first request loads the base model; model predictions can be wrong, and schema errors are displayed without correction.
 
 ## Training and reproducibility
 
