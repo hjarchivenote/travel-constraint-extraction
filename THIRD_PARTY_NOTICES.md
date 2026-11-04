@@ -15,3 +15,7 @@ Weather data by Open-Meteo, using ECMWF IFS 0.25° forecasts, [CC BY 4.0](https:
 ## Dependencies
 
 MLX / MLX LM, Transformers, Hugging Face Hub and jsonschema retain their respective upstream licenses. The presentation and report authoring dependencies are not required to run the model or demo.
+
+## Additional 1.5B adapters
+
+The earlier and improved Qwen2.5-1.5B-Instruct adapters include their base license and modification notices in artifacts/qwen15_earlier/ and artifacts/qwen15_improved/. Base weights are excluded.

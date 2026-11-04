@@ -1,0 +1,870 @@
+{
+  "audit": {
+    "created_at_utc": "2026-11-03T16:29:57.608568+00:00",
+    "records": 1000,
+    "splits": {
+      "train": 800,
+      "validation": 100,
+      "test": 100
+    },
+    "original_training_replay": 280,
+    "new_training": 520,
+    "unique_requests": {
+      "train": 752,
+      "validation": 100,
+      "test": 100
+    },
+    "new_frame_counts": {
+      "train": 111,
+      "validation": 52,
+      "test": 51
+    },
+    "new_families": {
+      "walk_segment": 35,
+      "weather_alternative": 25,
+      "walk_daily": 40,
+      "minimize": 15,
+      "walk_unknown": 20,
+      "near": 30,
+      "weather_avoid": 75,
+      "time_exact": 25,
+      "place_soft": 25,
+      "conflict": 25,
+      "time_by": 30,
+      "combined": 50,
+      "time_lower": 45,
+      "time_vague": 15,
+      "weather_independent": 20,
+      "place_exclude": 20,
+      "place_hard": 25
+    },
+    "weather_avoid_training_examples": 100,
+    "schema_failures": 0,
+    "request_overlap_between_splits": 0,
+    "reference_overlap_between_splits": 0,
+    "human_reviewed": 0,
+    "limitation": "Controlled synthetic frames, not 1000 independent human expressions; frame pools and references are split, but intents and compositional vocabulary recur.",
+    "dataset_sha256": "35da4338b71db2463a91a236adc2a179e6a5db6c6d95a2881597f69479d8cde0",
+    "max_example_tokens": 998,
+    "chosen_max_seq_length": 1024,
+    "unique_record_ids": 1000,
+    "token_truncations": 0
+  },
+  "training": {
+    "iters": 1600,
+    "learning_rate": 2e-05,
+    "batch_size": 1,
+    "seed": 44,
+    "num_layers": 4,
+    "max_seq_length": 1024,
+    "lora_parameters": {
+      "rank": 8,
+      "dropout": 0.0,
+      "scale": 20.0
+    },
+    "mask_prompt": true,
+    "optimizer": "adam",
+    "val_batches": 10,
+    "device": "cpu",
+    "elapsed_seconds": 15846.568028875015,
+    "optimizer_state_restored": false
+  },
+  "adapter_check": {
+    "state": "passed",
+    "array_count": 56,
+    "all_finite": true,
+    "reload_exact": true,
+    "sha256": "83d29ed8eee6829a05f1e0531ab6a5adc36bb3a35ab4e13e85af733f5fb42f5f"
+  },
+  "final": {
+    "test100": {
+      "raw_primary": {
+        "baseline": {
+          "records": 100,
+          "precision": 0.5723684210526315,
+          "recall": 0.453125,
+          "f1": 0.5058139534883721,
+          "priority_accuracy_on_matched": 0.9080459770114943,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.86,
+          "exact_record_accuracy": 0.44,
+          "mean_inference_seconds_including_first_request": 15.984140252138605,
+          "counts": {
+            "tp": 87,
+            "fp": 65,
+            "fn": 105,
+            "priority_correct": 79,
+            "priority_total": 87,
+            "clarification_correct": 87
+          }
+        },
+        "candidate": {
+          "records": 100,
+          "precision": 0.8486486486486486,
+          "recall": 0.8177083333333334,
+          "f1": 0.8328912466843502,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.98,
+          "exact_record_accuracy": 0.75,
+          "mean_inference_seconds_including_first_request": 10.967662052520318,
+          "counts": {
+            "tp": 157,
+            "fp": 28,
+            "fn": 35,
+            "priority_correct": 157,
+            "priority_total": 157,
+            "clarification_correct": 157
+          }
+        }
+      },
+      "full_system": {
+        "baseline": {
+          "records": 100,
+          "precision": 0.7339901477832512,
+          "recall": 0.7760416666666666,
+          "f1": 0.7544303797468355,
+          "priority_accuracy_on_matched": 0.9328859060402684,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.61,
+          "mean_inference_seconds_including_first_request": 15.984140252138605,
+          "counts": {
+            "tp": 149,
+            "fp": 54,
+            "fn": 43,
+            "priority_correct": 139,
+            "priority_total": 149,
+            "clarification_correct": 149
+          }
+        },
+        "candidate": {
+          "records": 100,
+          "precision": 0.8928571428571429,
+          "recall": 0.9114583333333334,
+          "f1": 0.9020618556701031,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.82,
+          "mean_inference_seconds_including_first_request": 10.967662052520318,
+          "counts": {
+            "tp": 175,
+            "fp": 21,
+            "fn": 17,
+            "priority_correct": 175,
+            "priority_total": 175,
+            "clarification_correct": 175
+          }
+        }
+      }
+    },
+    "candidate_selected_before_test": true,
+    "test_used_for_tuning": false,
+    "limitation": "Controlled AI-authored synthetic test; no human review or real-user effectiveness claim.",
+    "published": false
+  },
+  "earlier_primary_updates": 840,
+  "primary_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "earlier_test": {
+    "small_lora": {
+      "records": 80,
+      "precision": 0.8558558558558559,
+      "recall": 0.7421875,
+      "f1": 0.7949790794979079,
+      "priority_accuracy_on_matched": 0.968421052631579,
+      "clarification_accuracy_on_matched": 1.0,
+      "schema_validity_rate": 0.975,
+      "exact_record_accuracy": 0.7125,
+      "mean_inference_seconds_including_first_request": 3.9343625,
+      "counts": {
+        "tp": 95,
+        "fp": 16,
+        "fn": 33,
+        "priority_correct": 92,
+        "priority_total": 95,
+        "clarification_correct": 95
+      },
+      "f1_cluster_bootstrap_95_interval": [
+        0.6666666666666666,
+        0.900398406374502
+      ],
+      "bootstrap_unit": "reference scenario (four paraphrases kept together)",
+      "bootstrap_resamples": 2000,
+      "by_family": {
+        "place_include": {
+          "records": 8,
+          "precision": 0.8571428571428571,
+          "recall": 0.75,
+          "f1": 0.7999999999999999,
+          "priority_accuracy_on_matched": 0.5,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.875,
+          "exact_record_accuracy": 0.375,
+          "mean_inference_seconds_including_first_request": 3.2437875,
+          "counts": {
+            "tp": 6,
+            "fp": 1,
+            "fn": 2,
+            "priority_correct": 3,
+            "priority_total": 6,
+            "clarification_correct": 6
+          }
+        },
+        "place_exclude": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 3.2232,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "hotel_time": {
+          "records": 8,
+          "precision": 0.375,
+          "recall": 0.375,
+          "f1": 0.375,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.375,
+          "mean_inference_seconds_including_first_request": 3.01505,
+          "counts": {
+            "tp": 3,
+            "fp": 5,
+            "fn": 5,
+            "priority_correct": 3,
+            "priority_total": 3,
+            "clarification_correct": 3
+          }
+        },
+        "walking_limit": {
+          "records": 8,
+          "precision": 0.75,
+          "recall": 0.75,
+          "f1": 0.75,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.75,
+          "mean_inference_seconds_including_first_request": 3.43925,
+          "counts": {
+            "tp": 6,
+            "fp": 2,
+            "fn": 2,
+            "priority_correct": 6,
+            "priority_total": 6,
+            "clarification_correct": 6
+          }
+        },
+        "walking_minimize": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 2.9272875,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "ambiguous_time": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 2.9571,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "ambiguous_walking_scope": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 3.390925,
+          "counts": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "near_lunch": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 2.9863875,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "weather_alternative": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 5.6417375,
+          "counts": {
+            "tp": 16,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 16,
+            "priority_total": 16,
+            "clarification_correct": 16
+          }
+        },
+        "combined": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "f1": 0.8,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.875,
+          "exact_record_accuracy": 0.625,
+          "mean_inference_seconds_including_first_request": 8.5189,
+          "counts": {
+            "tp": 32,
+            "fp": 0,
+            "fn": 16,
+            "priority_correct": 32,
+            "priority_total": 32,
+            "clarification_correct": 32
+          }
+        }
+      }
+    },
+    "small_baseline": {
+      "records": 80,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "priority_accuracy_on_matched": null,
+      "clarification_accuracy_on_matched": null,
+      "schema_validity_rate": 0.0,
+      "exact_record_accuracy": 0.0,
+      "mean_inference_seconds_including_first_request": 19.41545875,
+      "counts": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 128,
+        "priority_correct": 0,
+        "priority_total": 0,
+        "clarification_correct": 0
+      },
+      "f1_cluster_bootstrap_95_interval": [
+        0.0,
+        0.0
+      ],
+      "bootstrap_unit": "reference scenario (four paraphrases kept together)",
+      "bootstrap_resamples": 2000,
+      "by_family": {
+        "place_include": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 17.7462875,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "place_exclude": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 28.070325,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "hotel_time": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 28.4268875,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "walking_limit": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 8.5490875,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "walking_minimize": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 28.4073,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "ambiguous_time": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 29.7880125,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "ambiguous_walking_scope": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 14.55105,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "near_lunch": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 19.338874999999998,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "weather_alternative": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 11.4821125,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 16,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "combined": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 0.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 7.79465,
+          "counts": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 48,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        }
+      }
+    },
+    "large_fewshot": {
+      "records": 80,
+      "precision": 0.8083333333333333,
+      "recall": 0.7578125,
+      "f1": 0.782258064516129,
+      "priority_accuracy_on_matched": 0.9896907216494846,
+      "clarification_accuracy_on_matched": 1.0,
+      "schema_validity_rate": 0.9375,
+      "exact_record_accuracy": 0.6375,
+      "mean_inference_seconds_including_first_request": 30.01079875,
+      "counts": {
+        "tp": 97,
+        "fp": 23,
+        "fn": 31,
+        "priority_correct": 96,
+        "priority_total": 97,
+        "clarification_correct": 97
+      },
+      "f1_cluster_bootstrap_95_interval": [
+        0.6153846153846154,
+        0.8870636550308009
+      ],
+      "bootstrap_unit": "reference scenario (four paraphrases kept together)",
+      "bootstrap_resamples": 2000,
+      "by_family": {
+        "place_include": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 0.625,
+          "f1": 0.7692307692307693,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.625,
+          "exact_record_accuracy": 0.625,
+          "mean_inference_seconds_including_first_request": 22.6973875,
+          "counts": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 3,
+            "priority_correct": 5,
+            "priority_total": 5,
+            "clarification_correct": 5
+          }
+        },
+        "place_exclude": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 23.762175,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "hotel_time": {
+          "records": 8,
+          "precision": 0.75,
+          "recall": 0.75,
+          "f1": 0.75,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.75,
+          "mean_inference_seconds_including_first_request": 22.083925,
+          "counts": {
+            "tp": 6,
+            "fp": 2,
+            "fn": 2,
+            "priority_correct": 6,
+            "priority_total": 6,
+            "clarification_correct": 6
+          }
+        },
+        "walking_limit": {
+          "records": 8,
+          "precision": 0.75,
+          "recall": 0.75,
+          "f1": 0.75,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.75,
+          "mean_inference_seconds_including_first_request": 24.132825,
+          "counts": {
+            "tp": 6,
+            "fp": 2,
+            "fn": 2,
+            "priority_correct": 6,
+            "priority_total": 6,
+            "clarification_correct": 6
+          }
+        },
+        "walking_minimize": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 22.83505,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "ambiguous_time": {
+          "records": 8,
+          "precision": 0.125,
+          "recall": 0.125,
+          "f1": 0.125,
+          "priority_accuracy_on_matched": 0.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 23.467850000000002,
+          "counts": {
+            "tp": 1,
+            "fp": 7,
+            "fn": 7,
+            "priority_correct": 0,
+            "priority_total": 1,
+            "clarification_correct": 1
+          }
+        },
+        "ambiguous_walking_scope": {
+          "records": 8,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "priority_accuracy_on_matched": null,
+          "clarification_accuracy_on_matched": null,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.0,
+          "mean_inference_seconds_including_first_request": 27.1993375,
+          "counts": {
+            "tp": 0,
+            "fp": 8,
+            "fn": 8,
+            "priority_correct": 0,
+            "priority_total": 0,
+            "clarification_correct": 0
+          }
+        },
+        "near_lunch": {
+          "records": 8,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 1.0,
+          "mean_inference_seconds_including_first_request": 23.7903125,
+          "counts": {
+            "tp": 8,
+            "fp": 0,
+            "fn": 0,
+            "priority_correct": 8,
+            "priority_total": 8,
+            "clarification_correct": 8
+          }
+        },
+        "weather_alternative": {
+          "records": 8,
+          "precision": 0.8333333333333334,
+          "recall": 0.625,
+          "f1": 0.7142857142857143,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 0.75,
+          "exact_record_accuracy": 0.5,
+          "mean_inference_seconds_including_first_request": 37.0239375,
+          "counts": {
+            "tp": 10,
+            "fp": 2,
+            "fn": 6,
+            "priority_correct": 10,
+            "priority_total": 10,
+            "clarification_correct": 10
+          }
+        },
+        "combined": {
+          "records": 8,
+          "precision": 0.9574468085106383,
+          "recall": 0.9375,
+          "f1": 0.9473684210526315,
+          "priority_accuracy_on_matched": 1.0,
+          "clarification_accuracy_on_matched": 1.0,
+          "schema_validity_rate": 1.0,
+          "exact_record_accuracy": 0.75,
+          "mean_inference_seconds_including_first_request": 73.1151875,
+          "counts": {
+            "tp": 45,
+            "fp": 2,
+            "fn": 3,
+            "priority_correct": 45,
+            "priority_total": 45,
+            "clarification_correct": 45
+          }
+        }
+      }
+    }
+  },
+  "errors_by_family": {
+    "combined": {
+      "total": 20,
+      "incorrect": 10
+    },
+    "weather_independent": {
+      "total": 5,
+      "incorrect": 2
+    },
+    "weather_alternative": {
+      "total": 5,
+      "incorrect": 2
+    },
+    "walk_unknown": {
+      "total": 5,
+      "incorrect": 3
+    },
+    "conflict": {
+      "total": 5,
+      "incorrect": 1
+    }
+  },
+  "examples": [
+    {
+      "id": "expanded_test_0056",
+      "request": "My request is as follows: Rain should switch the scheduled walk to a book cafe, and no rain should leave it intact.",
+      "expected": "Keep the walk if there is no rain.",
+      "observed": "The condition to keep the walk was set to rain instead."
+    },
+    {
+      "id": "expanded_test_0078",
+      "request": "Please make this adjustment: My walking-time allowance is 73 minutes; whether this applies per walk is undecided.",
+      "expected": "Use a 73-minute cap, with scope unresolved and clarification required.",
+      "observed": "The model assigned the cap to each walking segment and did not ask for clarification."
+    },
+    {
+      "id": "expanded_test_0062",
+      "request": "I insist on retaining the visit to British Museum. Use the scheduled gallery as the anchor for a nearby lunch. 10:34 pm is the earliest permissible hotel arrival. No outdoor visits should take place in rain.",
+      "expected": "Find lunch near the scheduled gallery, The Courtauld Gallery.",
+      "observed": "The output used the British Museum as the lunch anchor."
+    }
+  ],
+  "sha256": {
+    "results.json": "c1d2a517f7074f9a9be96d8ffa48789e81525505cb206faa13593dd9de458e2f",
+    "baseline_test100.jsonl": "4f32e0384aec4d5e0644253f5c2ba6e5c7d1f348f7d6fc5fa8e877a0a6c27e1a",
+    "candidate_test100.jsonl": "136b4255b31810b2187c7164a0aaa631d0cef653571652d38b8bb4638068a5d1",
+    "blinded_inputs.jsonl": "db297cfbf09a8894f282d602e0f1058d07119304339f97ba50b5f369cf8ac228"
+  }
+}

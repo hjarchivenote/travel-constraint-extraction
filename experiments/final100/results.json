@@ -1,0 +1,88 @@
+{
+  "test100": {
+    "raw_primary": {
+      "baseline": {
+        "records": 100,
+        "precision": 0.5723684210526315,
+        "recall": 0.453125,
+        "f1": 0.5058139534883721,
+        "priority_accuracy_on_matched": 0.9080459770114943,
+        "clarification_accuracy_on_matched": 1.0,
+        "schema_validity_rate": 0.86,
+        "exact_record_accuracy": 0.44,
+        "mean_inference_seconds_including_first_request": 15.984140252138605,
+        "counts": {
+          "tp": 87,
+          "fp": 65,
+          "fn": 105,
+          "priority_correct": 79,
+          "priority_total": 87,
+          "clarification_correct": 87
+        }
+      },
+      "candidate": {
+        "records": 100,
+        "precision": 0.8486486486486486,
+        "recall": 0.8177083333333334,
+        "f1": 0.8328912466843502,
+        "priority_accuracy_on_matched": 1.0,
+        "clarification_accuracy_on_matched": 1.0,
+        "schema_validity_rate": 0.98,
+        "exact_record_accuracy": 0.75,
+        "mean_inference_seconds_including_first_request": 10.967662052520318,
+        "counts": {
+          "tp": 157,
+          "fp": 28,
+          "fn": 35,
+          "priority_correct": 157,
+          "priority_total": 157,
+          "clarification_correct": 157
+        }
+      }
+    },
+    "full_system": {
+      "baseline": {
+        "records": 100,
+        "precision": 0.7339901477832512,
+        "recall": 0.7760416666666666,
+        "f1": 0.7544303797468355,
+        "priority_accuracy_on_matched": 0.9328859060402684,
+        "clarification_accuracy_on_matched": 1.0,
+        "schema_validity_rate": 1.0,
+        "exact_record_accuracy": 0.61,
+        "mean_inference_seconds_including_first_request": 15.984140252138605,
+        "counts": {
+          "tp": 149,
+          "fp": 54,
+          "fn": 43,
+          "priority_correct": 139,
+          "priority_total": 149,
+          "clarification_correct": 149
+        }
+      },
+      "candidate": {
+        "records": 100,
+        "precision": 0.8928571428571429,
+        "recall": 0.9114583333333334,
+        "f1": 0.9020618556701031,
+        "priority_accuracy_on_matched": 1.0,
+        "clarification_accuracy_on_matched": 1.0,
+        "schema_validity_rate": 1.0,
+        "exact_record_accuracy": 0.82,
+        "mean_inference_seconds_including_first_request": 10.967662052520318,
+        "counts": {
+          "tp": 175,
+          "fp": 21,
+          "fn": 17,
+          "priority_correct": 175,
+          "priority_total": 175,
+          "clarification_correct": 175
+        }
+      }
+    }
+  },
+  "candidate_selected_before_test": true,
+  "test_used_for_tuning": false,
+  "limitation": "Controlled AI-authored synthetic test; no human review or real-user effectiveness claim.",
+  "published": false
+}

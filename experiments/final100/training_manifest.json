@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "elapsed_seconds": 15846.568028875015,
+  "finished_at_utc": "2026-11-03T22:12:16.163020+00:00",
+  "optimizer_state_restored": false,
+  "device": "cpu",
+  "dataset_sha256": "35da4338b71db2463a91a236adc2a179e6a5db6c6d95a2881597f69479d8cde0"
+}

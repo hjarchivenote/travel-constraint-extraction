@@ -1,0 +1,51 @@
+{
+  "created_at_utc": "2026-11-03T16:29:57.608568+00:00",
+  "records": 1000,
+  "splits": {
+    "train": 800,
+    "validation": 100,
+    "test": 100
+  },
+  "original_training_replay": 280,
+  "new_training": 520,
+  "unique_requests": {
+    "train": 752,
+    "validation": 100,
+    "test": 100
+  },
+  "new_frame_counts": {
+    "train": 111,
+    "validation": 52,
+    "test": 51
+  },
+  "new_families": {
+    "walk_segment": 35,
+    "weather_alternative": 25,
+    "walk_daily": 40,
+    "minimize": 15,
+    "walk_unknown": 20,
+    "near": 30,
+    "weather_avoid": 75,
+    "time_exact": 25,
+    "place_soft": 25,
+    "conflict": 25,
+    "time_by": 30,
+    "combined": 50,
+    "time_lower": 45,
+    "time_vague": 15,
+    "weather_independent": 20,
+    "place_exclude": 20,
+    "place_hard": 25
+  },
+  "weather_avoid_training_examples": 100,
+  "schema_failures": 0,
+  "request_overlap_between_splits": 0,
+  "reference_overlap_between_splits": 0,
+  "human_reviewed": 0,
+  "limitation": "Controlled synthetic frames, not 1000 independent human expressions; frame pools and references are split, but intents and compositional vocabulary recur.",
+  "dataset_sha256": "35da4338b71db2463a91a236adc2a179e6a5db6c6d95a2881597f69479d8cde0",
+  "max_example_tokens": 998,
+  "chosen_max_seq_length": 1024,
+  "unique_record_ids": 1000,
+  "token_truncations": 0
+}

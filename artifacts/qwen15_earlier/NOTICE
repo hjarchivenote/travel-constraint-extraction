@@ -1,0 +1,6 @@
+Travel Constraint Extraction LoRA adapter
+Base: Qwen/Qwen2.5-1.5B-Instruct, revision 989aa7980e4cf806f80c7fef2b1adb7bc71aa306.
+Apache License 2.0, included as LICENSE.
+Modification: Earlier adapter, 840 effective updates.
+Hyojin Lee, Recent Areas of AI, 2026.
+Adapter configuration paths were normalized for portability. Base weights are not included.

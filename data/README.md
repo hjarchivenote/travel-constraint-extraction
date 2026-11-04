@@ -1,5 +1,11 @@
 # Dataset
 
+## Expanded study
+
+`expanded/records.jsonl` contains 1,000 AI-authored requests and reference answers. The split is 800 train, 100 validation and 100 test. The `expanded/audit.json` records checks for cross-split request and reference overlap, token length and schema validity. The serialized training inputs and split IDs are in `expanded/training/`. No labels were human-reviewed.
+
+## Original study
+
 `travel_requests.jsonl` is the frozen v2 NLP corpus: **400 synthetic records, 100 reference scenarios × four request paraphrases**. `splits.json` records the 280 training, 40 validation, and 80 test IDs. All paraphrases of a scenario stay together. There are 400 unique full inputs and 252 distinct request texts; no exact request text crosses splits. Shared semantic frames and within-split wording remain.
 
 **Annotations are AI-reviewed, not human-verified.** The review covered wording patterns and instantiated values, with automated consistency checks on all records. No human approval is inferred. `metadata.json` and `ai_review_v2.json` record this distinction. Treat scores as a controlled synthetic experiment rather than a real-user benchmark.
