@@ -2,6 +2,12 @@
 
 A locally fine-tuned Transformer that turns English requests to change a London itinerary into structured JSON. It extracts place visits, time bounds, walking limits, and weather conditions. A browser demo shows how the extracted conditions change an example plan.
 
+## Start with the notebook
+
+Open the [complete project walkthrough](project_walkthrough.ipynb) to follow the data, output format, model and training settings, baseline comparison, final results, observed errors, and weather-dependent demo in one place.
+
+The notebook includes executed outputs. Its code recalculates the published scores from the saved predictions and calls the original planner for the rain and dry examples. It uses the implementation in `src/travel_constraints/`. You can read it directly on GitHub or run all cells in a Jupyter Python kernel with `jsonschema==4.26.0` installed.
+
 ## Results
 
 The earlier and improved adapters use the same Qwen2.5-1.5B-Instruct base. Both were tested on the same **100 held-out requests**. Both full systems used the same validation and retry rules.
@@ -47,6 +53,7 @@ Choose **Live local model** for new text. Setup downloads the pinned base models
 
 | Path | What to inspect |
 | --- | --- |
+| [project_walkthrough.ipynb](project_walkthrough.ipynb) | Executed walkthrough of the complete project and recorded results |
 | [src/travel_constraints/](src/travel_constraints/) | Output schema, model inference, evidence checks, and scoring |
 | [data/expanded/](data/expanded/) | Frozen corpus, training examples, split IDs, and audit |
 | [experiments/final100/](experiments/final100/) | Pinned settings, recorded predictions, metrics, and score reproduction |
